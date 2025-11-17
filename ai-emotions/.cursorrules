@@ -1,0 +1,269 @@
+## 1. Project Overview
+
+- This is a **React 18 + Vite + TypeScript** single-page application.
+- Use **functional components + hooks only**. Do **not** use class components.
+- Assume modern browser support (ES2020+), no IE support.
+- Primary goals:
+  - Clean, well-typed code.
+  - Easy-to-navigate file structure.
+  - Small, composable UI components.
+
+---
+
+## 2. Tech Stack & Libraries
+
+When generating or editing code, assume:
+
+- Build: `Vite` (`vite.config.ts`)
+- Language: `TypeScript` everywhere (`.ts` / `.tsx`, no `.js`).
+- UI: React + CSS (or Tailwind if it already exists; don’t introduce new UI libs unless asked).
+- Routing: `react-router-dom` if routing is present.
+- Data fetching: `fetch` or `axios` (match existing choice).
+- State:
+  - Prefer **React state + context** for simple cases.
+  - If a state library exists (e.g. Zustand, Redux, React Query), **reuse it**; don’t add another.
+- Testing:
+  - Unit tests: `Vitest`.
+  - React tests: `@testing-library/react`.
+
+If you’re unsure between multiple options, **follow existing patterns in this repo**.
+
+---
+
+## 3. File & Folder Structure
+
+When adding new code, follow this structure:
+
+- `src/main.tsx` – App entry
+- `src/App.tsx` – High-level layout / routing
+- `src/components/` – Reusable, presentational components
+  - `MyComponent/`
+    - `MyComponent.tsx`
+    - `MyComponent.test.tsx`
+    - `MyComponent.types.ts` (optional, for shared types)
+- `src/features/` – Feature-based folders for larger domains
+  - `feature-name/`
+    - `components/`
+    - `hooks/`
+    - `types.ts`
+    - `api.ts`
+- `src/hooks/` – Generic reusable hooks
+- `src/lib/` – Utilities, helpers, configuration
+- `src/styles/` – Global styles (CSS/Tailwind config)
+- `src/routes/` or `src/pages/` – Route-level components (if applicable)
+
+Rules:
+
+- Use **PascalCase** for React components & files: `UserCard.tsx`.
+- Use **camelCase** for variables, functions, hooks: `useUserData`.
+- Use **kebab-case** for folders: `user-profile`, `auth-form`.
+- One component per file unless it’s a very small helper-only component.
+
+---
+
+## 4. TypeScript & Coding Style
+
+General:
+
+- **No `any`**. If you must, wrap it with a TODO comment explaining why and how to fix later.
+- Prefer explicit types for public APIs, hooks, and component props.
+- Use **type aliases** or **interfaces** for reusable shapes in `/types.ts` files.
+- Use **discriminated unions** instead of enums where possible.
+
+Components:
+
+- Always type props explicitly:
+
+  ```ts
+  type UserCardProps = {
+    user: User;
+    onSelect?: (id: string) => void;
+  };
+
+  export function UserCard({ user, onSelect }: UserCardProps) { ... }
+  ```
+
+- Default exports: only if there is clearly one main component per file; otherwise prefer named exports.
+- Keep components small and focused. If a component becomes large (e.g. > ~150 lines), consider extracting subcomponents or hooks.
+
+Hooks:
+
+- Custom hooks must be named `useXxx` and live in `hooks/` when reused across features.
+- Hooks should encapsulate:
+  - Data fetching
+  - Derived state / business logic
+  - Side effects (subscriptions, timers, etc.)
+- Components should be mostly about **layout and rendering**, not complex logic.
+
+---
+
+## 5. React Patterns & Behavior
+
+- Prefer **controlled** components for forms unless a clear reason to use uncontrolled.
+- Avoid prop drilling; use context or a state library if 3+ levels deep.
+- Avoid unnecessary re-renders:
+  - Use `useMemo` and `useCallback` only when there is a real performance or dependency issue, not by default.
+- When adding async logic:
+  - Handle loading, success, and error states explicitly.
+  - Show user-friendly messages, not raw error objects.
+
+Examples:
+
+- **Data fetching pattern** (no global state library):
+
+  ```ts
+  const [data, setData] = useState<DataType | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    fetch("/api/resource")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch resource");
+        const json = (await res.json()) as DataType;
+        if (isMounted) setData(json);
+      })
+      .catch((err: unknown) => {
+        if (isMounted)
+          setError(err instanceof Error ? err.message : "Unknown error");
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+  ```
+
+---
+
+## 6. Styling & CSS
+
+- Do **not** introduce a new styling solution; use what’s already in the project:
+  - If Tailwind is configured, use Tailwind utility classes.
+  - If CSS modules are used, create `ComponentName.module.css`.
+  - If global CSS, keep selectors BEM-like and scoped.
+
+Rules:
+
+- Keep styling close to components, **except** global layout, variables, and resets.
+- Prefer semantic HTML: use `<button>`, `<nav>`, `<header>`, `<main>`, `<section>`, etc.
+- Ensure reasonable accessibility:
+  - Use aria attributes when necessary.
+  - Make interactive elements keyboard accessible.
+
+---
+
+## 7. Testing
+
+When adding new features, **add or update tests**:
+
+- Use `Vitest` (`.test.ts` / `.test.tsx`) for unit tests.
+- Use `@testing-library/react` for React components.
+
+Guidelines:
+
+- Test **behavior**, not implementation details.
+- For components:
+  - Render component with typical props.
+  - Assert visible text, roles, and user interactions.
+- For pure functions:
+  - Test edge cases and typical cases.
+
+Example test pattern:
+
+```ts
+import { render, screen, fireEvent } from "@testing-library/react";
+import { UserCard } from "./UserCard";
+
+it("renders user name and triggers callback on click", () => {
+  const handleSelect = vi.fn();
+  render(<UserCard user={{ id: "1", name: "Abdo" }} onSelect={handleSelect} />);
+
+  fireEvent.click(screen.getByText("Abdo"));
+  expect(handleSelect).toHaveBeenCalledWith("1");
+});
+```
+
+---
+
+## 8. AI Behavior in This Repo
+
+When editing existing code:
+
+- **Preserve existing style and patterns**:
+  - Match current imports, formatting, and folder structure.
+  - Do not convert between `function` declarations and arrow functions unless asked.
+- Minimize changes:
+  - Do not refactor an entire file when a small change is requested.
+  - Keep diffs focused and relevant.
+- When a change is non-trivial:
+  - Briefly comment or explain the reasoning in code comments if helpful to future maintainers.
+
+When creating new code:
+
+- Prefer **clear and simple** solutions over clever ones.
+- Add **minimal inline comments** only where logic is non-obvious.
+- If there are multiple ways to solve a problem, choose the one that:
+  - Matches existing patterns.
+  - Is easiest to read and maintain.
+
+---
+
+## 9. Documentation & Naming
+
+- Names must be:
+  - Descriptive, not abbreviated: `fetchUserProfile`, not `fUP`.
+  - Consistent: if you use `userId` in one place, don’t use `id` elsewhere for the same concept.
+- For non-trivial utilities and hooks, add a short doc comment above the function:
+  ```ts
+  /**
+   * useDebouncedValue returns a value that only updates
+   * after the given delay has passed without changes.
+   */
+  ```
+- Keep README and other docs up-to-date when adding significant features.
+
+---
+
+## 10. Performance & Optimization
+
+- Avoid premature optimization:
+  - First, write clear code.
+  - Only optimize for actual bottlenecks.
+- When handling large lists:
+  - Consider virtualization (e.g. `react-virtual`), but only if the project already uses it or truly needs it.
+- Be careful with dependencies in hooks:
+  - Include all required dependencies.
+  - If a function changes too often, consider extracting stable logic or using `useCallback`.
+
+---
+
+## 11. Error Handling & Edge Cases
+
+- Always handle:
+  - Empty states (no data).
+  - Loading states.
+  - Error states (network errors, invalid input).
+- Never expose raw stack traces or internal error messages to end users.
+- For user input:
+  - Validate on the client side.
+  - Show clear, human-friendly error messages.
+
+---
+
+## 12. Migration & Refactors
+
+When asked to refactor:
+
+- **Step-by-step, not all-at-once**:
+  - Keep changes incremental and safe.
+  - Preserve behavior; don’t introduce new features during refactors.
+- If a refactor is large, propose:
+  - A small plan (phases / steps).
+  - The minimum set of files affected in each step.
