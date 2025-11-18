@@ -26,6 +26,7 @@ interface ChromaGridProps {
   fadeOut?: number;
   ease?: string;
   onCardEnter?: (item: ChromaItem, index: number) => void;
+  selectedPersonaId?: string | null;
 }
 
 export const ChromaGrid = ({
@@ -38,6 +39,7 @@ export const ChromaGrid = ({
   fadeOut = 0.6,
   ease = 'power3.out',
   onCardEnter,
+  selectedPersonaId,
 }: ChromaGridProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
@@ -173,10 +175,12 @@ export const ChromaGrid = ({
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
     >
-      {data.map((c, i) => (
+      {data.map((c, i) => {
+        const isActive = selectedPersonaId && c.id === selectedPersonaId;
+        return (
         <article
           key={i}
-          className="chroma-card"
+          className={`chroma-card ${isActive ? 'speaking' : ''}`}
           onMouseMove={handleCardMove}
           onMouseEnter={() => onCardEnter?.(c, i)}
           onClick={() => handleCardClick(c.url)}
@@ -196,7 +200,8 @@ export const ChromaGrid = ({
             {c.location && <span className="location">{c.location}</span>}
           </footer>
         </article>
-      ))}
+        );
+      })}
       <div className="chroma-overlay" />
       <div ref={fadeRef} className="chroma-fade" />
     </div>

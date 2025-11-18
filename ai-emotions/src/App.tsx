@@ -2,30 +2,37 @@ import { FormEvent, useEffect, useMemo, useState } from "react"
 import ChromaGrid from "./components/ChromaGrid"
 import "./App.css"
 import { usePerspectives } from "./hooks/usePerspectives"
-import type { PersonaPerspective } from "./hooks/usePerspectives"
+import type { Character } from "./hooks/usePerspectives"
 import { usePersonaVoices } from "./hooks/usePersonaVoices"
 
 const suggestionExamples = [
-  "My teammate took credit for a feature I built.",
-  "I had to cancel dinner on a close friend last-minute.",
-  "A stranger helped me when my car broke down on the highway.",
+  "Should I confront my friend who keeps canceling plans?",
+  "I found out my coworker earns more than me for the same role.",
+  "My parents don't support my career change to art.",
 ]
 
 function App() {
   const [input, setInput] = useState("")
-  const [scenario, setScenario] = useState("")
+  const [userTopic, setUserTopic] = useState("")
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
-  const { personas, fetchPerspectives, isLoading, error } = usePerspectives()
-  const { generateVoices, playVoice, unlockAudio, voiceStatus } =
-    usePersonaVoices()
+  const { story, fetchStory, isLoading, error } = usePerspectives()
+  
+  const {
+    generateAllVoices,
+    playAllDialogue,
+    stopAudio,
+    unlockAudio,
+    isGenerating,
+    currentDialogueIndex,
+  } = usePersonaVoices()
 
   const handleSubmit = async (value?: string) => {
-    const story = (value ?? input).trim()
-    if (!story) return
+    const topic = (value ?? input).trim()
+    if (!topic) return
     unlockAudio()
-    setScenario(story)
-    await fetchPerspectives(story)
+    setUserTopic(topic)
+    await fetchStory(topic)
     setHasSubmitted(true)
   }
 
@@ -35,63 +42,76 @@ function App() {
   }
 
   useEffect(() => {
-    if (!personas.length || !scenario) return
-    generateVoices(
-      personas.map((persona) => ({
-        id: persona.id,
-        opinion: persona.opinion,
-        voiceId: persona.voiceId,
-      }))
-    )
-  }, [generateVoices, personas, scenario])
+    if (!story || !story.characters.length || !story.dialogue.length) return
+    generateAllVoices(story.dialogue, story.characters)
+  }, [generateAllVoices, story])
 
-  const gridItems = useMemo(
-    () =>
-      personas.map((persona) => ({
-        ...persona,
-      })),
-    [personas]
-  )
+  // Convert characters to grid items format
+  const gridItems = useMemo(() => {
+    if (!story) return []
+    return story.characters.map((char) => ({
+      id: char.id,
+      image: char.image,
+      title: char.name,
+      subtitle: char.role,
+      handle: `@${char.id}`,
+      borderColor: char.borderColor,
+      gradient: char.gradient,
+      url: "",
+    }))
+  }, [story])
 
-  const voicesReady = useMemo(
-    () =>
-      personas.every(
-        (persona) => voiceStatus[persona.id]?.status === "ready"
-      ),
-    [personas, voiceStatus]
-  )
+  const [conversationStarted, setConversationStarted] = useState(false)
+
+  const startConversation = () => {
+    if (!story || story.dialogue.length === 0 || conversationStarted) return
+    setConversationStarted(true)
+    playAllDialogue(story.dialogue.length)
+  }
+
+  const allVoicesReady = useMemo(() => {
+    if (!story || isGenerating) return false
+    return story.dialogue.length > 0
+  }, [story, isGenerating])
+
+  // Get the character currently speaking
+  const speakingCharacterId = useMemo(() => {
+    if (currentDialogueIndex === -1 || !story) return null
+    return story.dialogue[currentDialogueIndex]?.characterId || null
+  }, [currentDialogueIndex, story])
 
   return (
     <div className="app">
       {!hasSubmitted && (
         <div className="input-stage">
           <div className="input-container">
-            <h1 className="main-title">What happened?</h1>
+            <h1 className="main-title">What's on your mind?</h1>
             <p className="subtitle">
-              Share a moment. We'll show you how different people might see it.
+              Share a situation, dilemma, or moment. We'll create a conversation
+              exploring it from different angles.
             </p>
-            
+
             <form className="input-form" onSubmit={onSubmit}>
               <textarea
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder="My manager announced my idea as if it were theirs during the all-hands meeting..."
+                placeholder="Describe what you're thinking about..."
                 rows={5}
                 className="main-input"
                 autoFocus
               />
-              
+
               <button
                 type="submit"
                 className="submit-btn"
                 disabled={isLoading || !input.trim()}
               >
-                {isLoading ? "Gathering perspectives..." : "Get perspectives →"}
+                {isLoading ? "Crafting story..." : "Create story →"}
               </button>
             </form>
 
             <div className="examples">
-              <span className="examples-label">or try:</span>
+              <span className="examples-label">or explore:</span>
               <div className="examples-list">
                 {suggestionExamples.map((example) => (
                   <button
@@ -113,37 +133,78 @@ function App() {
       {hasSubmitted && (
         <div className="results-stage">
           <div className="results-header">
-            <p className="scenario-text">"{scenario}"</p>
+            <p className="scenario-text">"{userTopic}"</p>
             <div className="status-line">
-              {isLoading && <span className="status">Collecting viewpoints...</span>}
-              {!isLoading && !voicesReady && (
-                <span className="status">Warming up voices...</span>
+              {isLoading && <span className="status">Writing the scene...</span>}
+              {!isLoading && isGenerating && (
+                <span className="status">Preparing voices...</span>
               )}
-              {!isLoading && voicesReady && (
-                <span className="status-ready">Hover a persona to hear their take</span>
+              {!isLoading && allVoicesReady && (
+                <span className="status-ready">
+                  Ready to play
+                </span>
               )}
             </div>
+            {error && <p className="error-text">{error}</p>}
           </div>
 
-          <div className="grid-wrapper">
-            <ChromaGrid
-              items={gridItems}
-              radius={340}
-              columns={3}
-              rows={2}
-              onCardEnter={(item) => playVoice(item.id)}
-            />
-          </div>
+          {allVoicesReady && gridItems.length > 0 && (
+            <>
+              {!conversationStarted && (
+                <button className="play-story-btn" onClick={startConversation}>
+                  ▶ Play the conversation
+                </button>
+              )}
+
+              <div className="grid-wrapper">
+                <ChromaGrid
+                  items={gridItems}
+                  radius={340}
+                  columns={Math.min(3, gridItems.length)}
+                  rows={Math.ceil(gridItems.length / 3)}
+                  selectedPersonaId={speakingCharacterId}
+                />
+              </div>
+
+              {conversationStarted && (
+                <div className="dialogue-display">
+                  {story?.dialogue.map((line, index) => {
+                    const character = story.characters.find(
+                      (c) => c.id === line.characterId
+                    )
+                    const isActive = index === currentDialogueIndex
+                    const hasPlayed = index < currentDialogueIndex
+
+                    return (
+                      <div
+                        key={index}
+                        className={`dialogue-line ${isActive ? "active" : ""} ${
+                          hasPlayed ? "played" : ""
+                        }`}
+                      >
+                        <span className="character-name">
+                          {character?.name}:
+                        </span>{" "}
+                        <span className="dialogue-text">{line.text}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </>
+          )}
 
           <button
             className="new-scenario-btn"
             onClick={() => {
+              stopAudio()
+              setConversationStarted(false)
               setHasSubmitted(false)
               setInput("")
-              setScenario("")
+              setUserTopic("")
             }}
           >
-            Try another scenario
+            Create another story
           </button>
         </div>
       )}

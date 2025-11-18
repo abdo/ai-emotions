@@ -65,8 +65,21 @@
   z-index: 2;
 }
 
-.chroma-card:hover::before {
+.chroma-card:hover::before,
+.chroma-card.speaking::before {
   opacity: 1;
+}
+
+.chroma-card.speaking {
+  border-color: var(--card-border);
+  box-shadow: 0 0 40px var(--card-border), 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+/* When a card is speaking, show a static glow instead of mouse-following spotlight */
+.chroma-card.speaking::before {
+  opacity: 1;
+  background: radial-gradient(circle at 50% 50%, var(--spotlight-color), transparent 70%);
 }
 
 .chroma-img-wrapper {
