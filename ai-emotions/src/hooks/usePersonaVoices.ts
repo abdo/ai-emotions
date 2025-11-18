@@ -16,13 +16,12 @@ type DialogueAudio = {
 type AudioMap = Record<number, DialogueAudio>;
 
 // Standardized character roles with specific voice configurations
+// Note: Voice is determined by character gender, not role
 type VoiceConfig = {
-  voice: string;
-  speed: number;
-  model: "tts-1" | "tts-1-hd";
+  instructions: string;
 };
 
-type CharacterRole =
+export type CharacterRole =
   | "empathetic"
   | "analytical"
   | "provocateur"
@@ -44,29 +43,64 @@ type CharacterRole =
   | "observer"
   | "wildcard";
 
-// Voice configurations for each standardized role
-const roleVoiceConfigs: Record<CharacterRole, VoiceConfig> = {
-  empathetic: { voice: "nova", speed: 1.0, model: "tts-1" }, // Warm, slower
-  analytical: { voice: "echo", speed: 1.1, model: "tts-1" }, // Clear, measured
-  provocateur: { voice: "onyx", speed: 1.2, model: "tts-1" }, // Bold, faster
-  emotional: { voice: "shimmer", speed: 0.95, model: "tts-1-hd" }, // Expressive, slower
-  calm: { voice: "alloy", speed: 0.95, model: "tts-1" }, // Soothing, slow
-  assertive: { voice: "echo", speed: 1.15, model: "tts-1" }, // Confident, slightly fast
-  skeptical: { voice: "onyx", speed: 1.05, model: "tts-1" }, // Questioning tone
-  optimistic: { voice: "shimmer", speed: 1.15, model: "tts-1" }, // Upbeat
-  cynical: { voice: "fable", speed: 1.0, model: "tts-1" }, // Dry, measured
-  nurturing: { voice: "nova", speed: 0.95, model: "tts-1-hd" }, // Gentle, slow
-  intense: { voice: "onyx", speed: 1.25, model: "tts-1-hd" }, // Powerful, fast
-  playful: { voice: "shimmer", speed: 1.2, model: "tts-1" }, // Light, quick
-  serious: { voice: "echo", speed: 1.0, model: "tts-1" }, // Grave, deliberate
-  wise: { voice: "fable", speed: 0.95, model: "tts-1-hd" }, // Measured, thoughtful
-  rebellious: { voice: "onyx", speed: 1.2, model: "tts-1" }, // Defiant, quick
-  mediator: { voice: "alloy", speed: 1.05, model: "tts-1" }, // Balanced, neutral
-  challenger: { voice: "echo", speed: 1.15, model: "tts-1" }, // Direct, firm
-  supporter: { voice: "nova", speed: 1.05, model: "tts-1" }, // Encouraging
-  observer: { voice: "alloy", speed: 1.0, model: "tts-1" }, // Detached, slow
-  wildcard: { voice: "fable", speed: 1.1, model: "tts-1" }, // Unpredictable
+// Export all available roles as an array for use in prompts
+export const availableRoles: CharacterRole[] = [
+  "empathetic",
+  "analytical",
+  "provocateur",
+  "emotional",
+  "calm",
+  "assertive",
+  "skeptical",
+  "optimistic",
+  "cynical",
+  "nurturing",
+  "intense",
+  "playful",
+  "serious",
+  "wise",
+  "rebellious",
+  "mediator",
+  "challenger",
+  "supporter",
+  "observer",
+  "wildcard",
+];
+
+// Role descriptions for Groq prompt (human-readable explanations)
+export const roleDescriptions: Record<CharacterRole, string> = {
+  empathetic: "warm, understanding, slower speech",
+  analytical: "logical, measured, clear thinking",
+  provocateur: "bold, challenging, faster speech",
+  emotional: "raw, expressive, passionate",
+  calm: "peaceful, soothing, slow",
+  assertive: "confident, direct, slightly fast",
+  skeptical: "questioning, doubtful",
+  optimistic: "hopeful, upbeat, positive",
+  cynical: "pessimistic, dry humor",
+  nurturing: "caring, gentle, slow",
+  intense: "powerful, fierce, fast speech",
+  playful: "lighthearted, fun, quick",
+  serious: "grave, deliberate, slow",
+  wise: "thoughtful, measured, sage-like",
+  rebellious: "defiant, quick, challenging",
+  mediator: "balanced, neutral, peacemaker",
+  challenger: "confrontational, direct",
+  supporter: "encouraging, cheerleader",
+  observer: "detached, watching, slow",
+  wildcard: "unpredictable, varying pace",
 };
+
+// Voice instructions for each standardized role (for gpt-4o-mini-tts)
+// Voice selection is gender-based (set in usePerspectives), instructions are role-based
+// Instructions are dynamically derived from roleDescriptions to avoid duplication
+export const roleVoiceConfigs: Record<CharacterRole, VoiceConfig> =
+  Object.fromEntries(
+    availableRoles.map((role) => [
+      role,
+      { instructions: roleDescriptions[role] },
+    ])
+  ) as Record<CharacterRole, VoiceConfig>;
 
 // Extract standardized role from character's role text
 const extractRole = (roleText: string): CharacterRole => {
@@ -217,12 +251,25 @@ export function usePersonaVoices() {
             // Clean the text before sending to TTS
             const cleanedText = cleanTextForSpeech(line.text);
 
-            // Get role-based voice configuration
+            // Get role-based configuration for instructions
             const characterRole = extractRole(character.role);
-            const voiceConfig = roleVoiceConfigs[characterRole];
+            const roleConfig = roleVoiceConfigs[characterRole];
+
+            // Use the character's assigned voiceId (gender-appropriate from usePerspectives)
+            const voiceId = character.voiceId;
+
+            if (!voiceId) {
+              console.error(
+                `[Voice ${index}] ${character.name} is missing voiceId!`
+              );
+              return;
+            }
 
             console.log(
-              `[Voice ${index}] ${character.name} (${characterRole}): voice=${voiceConfig.voice}, speed=${voiceConfig.speed}, model=${voiceConfig.model}`
+              `[Voice ${index}] ${character.name} (${character.gender}, ${characterRole}): voice=${voiceId}, model=gpt-4o-mini-tts`
+            );
+            console.log(
+              `  Instructions: ${roleConfig.instructions.substring(0, 80)}...`
             );
 
             const response = await fetch(
@@ -234,10 +281,10 @@ export function usePersonaVoices() {
                   Authorization: `Bearer ${openAiTTSApiKey}`,
                 },
                 body: JSON.stringify({
-                  model: voiceConfig.model,
-                  voice: voiceConfig.voice,
+                  model: "gpt-4o-mini-tts",
+                  voice: voiceId,
                   input: cleanedText,
-                  speed: voiceConfig.speed,
+                  instructions: roleConfig.instructions,
                 }),
               }
             );
@@ -287,7 +334,7 @@ export function usePersonaVoices() {
   );
 
   const playDialogue = useCallback(
-    (index: number, onFinished?: () => void) => {
+    (index: number, onFinished?: () => void, isFirstAudio: boolean = false) => {
       if (!unlockedRef.current) return;
       const audio = audioMap[index];
       if (!audio || audio.status !== "ready" || !audio.audioSrc) {
@@ -307,11 +354,16 @@ export function usePersonaVoices() {
           onFinished?.();
         };
 
-        audioElement.play().catch((err) => {
-          console.error("Audio playback error", err);
-          setCurrentDialogueIndex(-1);
-          onFinished?.();
-        });
+        // Add a small delay for the first audio to prevent cutting off the beginning
+        const playDelay = isFirstAudio ? 100 : 0;
+
+        setTimeout(() => {
+          audioElement.play().catch((err) => {
+            console.error("Audio playback error", err);
+            setCurrentDialogueIndex(-1);
+            onFinished?.();
+          });
+        }, playDelay);
       } catch (error) {
         console.error("Unable to play voice", error);
         setCurrentDialogueIndex(-1);
@@ -330,11 +382,16 @@ export function usePersonaVoices() {
           setCurrentDialogueIndex(-1);
           return;
         }
-        playDialogue(currentIndex, () => {
-          currentIndex++;
-          // Small delay between lines
-          setTimeout(playNext, 500);
-        });
+        const isFirst = currentIndex === 0;
+        playDialogue(
+          currentIndex,
+          () => {
+            currentIndex++;
+            // Small delay between lines
+            setTimeout(playNext, 500);
+          },
+          isFirst
+        );
       };
 
       playNext();

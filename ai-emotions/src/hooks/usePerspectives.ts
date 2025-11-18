@@ -1,10 +1,16 @@
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { groqApiKey } from "../keys.ignore";
+import {
+  pravatarImgIdsForMales,
+  pravatarImgIdsForFemales,
+} from "../lib/avatarConstants";
+import { availableRoles, roleDescriptions } from "./usePersonaVoices";
 
 export type Character = {
   id: string;
   name: string;
+  gender: "male" | "female";
   role: string;
   image: string;
   borderColor: string;
@@ -28,43 +34,62 @@ type PerspectivesState = {
   error: string | null;
 };
 
-const voicePool = [
-  "aura-2-athena-en",
-  "aura-2-thalia-en",
-  "aura-2-orion-en",
-  "aura-2-luna-en",
-  "aura-2-zeus-en",
-  "aura-2-sol-en",
-];
+// OpenAI voices by gender
+const maleVoices = ["onyx", "ash", "echo"];
+const femaleVoices = ["alloy", "nova", "shimmer", "sage", "coral"];
+
+// Helper to get random avatar ID for gender
+const getRandomAvatarId = (
+  gender: "male" | "female",
+  usedIds: Set<number>
+): number => {
+  const pool =
+    gender === "male" ? pravatarImgIdsForMales : pravatarImgIdsForFemales;
+  const available = pool.filter((id) => !usedIds.has(id));
+  if (available.length === 0) {
+    // If all used, pick randomly from pool
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  return available[Math.floor(Math.random() * available.length)];
+};
+
+// Helper to get random voice for gender
+const getRandomVoice = (gender: "male" | "female"): string => {
+  const pool = gender === "male" ? maleVoices : femaleVoices;
+  return pool[Math.floor(Math.random() * pool.length)];
+};
 
 const demoStory: StoryData = {
   characters: [
     {
       id: "maya",
-      name: "Maya",
-      role: "The Idealist",
-      image: "https://i.pravatar.cc/300?img=45",
+      name: "Maya Chen",
+      gender: "female",
+      role: "emotional",
+      image: "https://i.pravatar.cc/300?img=45", // Female from pravatarImgIdsForFemales
       borderColor: "#8B5CF6",
       gradient: "linear-gradient(145deg, #8B5CF6, #000)",
-      voiceId: voicePool[0],
+      voiceId: "nova", // Female voice
     },
     {
       id: "victor",
-      name: "Victor",
-      role: "The Pragmatist",
-      image: "https://i.pravatar.cc/300?img=12",
+      name: "Victor Reyes",
+      gender: "male",
+      role: "analytical",
+      image: "https://i.pravatar.cc/300?img=12", // Male from pravatarImgIdsForMales
       borderColor: "#EF4444",
       gradient: "linear-gradient(210deg, #EF4444, #000)",
-      voiceId: voicePool[1],
+      voiceId: "echo", // Male voice
     },
     {
       id: "sara",
-      name: "Sara",
-      role: "The Observer",
-      image: "https://i.pravatar.cc/300?img=32",
+      name: "Sara Mitchell",
+      gender: "female",
+      role: "calm",
+      image: "https://i.pravatar.cc/300?img=32", // Female from pravatarImgIdsForFemales
       borderColor: "#10B981",
       gradient: "linear-gradient(165deg, #10B981, #000)",
-      voiceId: voicePool[2],
+      voiceId: "shimmer", // Female voice
     },
   ],
   dialogue: [
@@ -143,26 +168,9 @@ Create characters with:
 
 **IMPORTANT: STANDARDIZED ROLES**
 Each character MUST have a "role" field that uses ONE of these exact values (this affects their voice characteristics):
-- "empathetic" - warm, understanding, slower speech
-- "analytical" - logical, measured, clear thinking
-- "provocateur" - bold, challenging, faster speech
-- "emotional" - raw, expressive, passionate
-- "calm" - peaceful, soothing, slow
-- "assertive" - confident, direct, slightly fast
-- "skeptical" - questioning, doubtful
-- "optimistic" - hopeful, upbeat, positive
-- "cynical" - pessimistic, dry humor
-- "nurturing" - caring, gentle, slow
-- "intense" - powerful, fierce, fast speech
-- "playful" - lighthearted, fun, quick
-- "serious" - grave, deliberate, slow
-- "wise" - thoughtful, measured, sage-like
-- "rebellious" - defiant, quick, challenging
-- "mediator" - balanced, neutral, peacemaker
-- "challenger" - confrontational, direct
-- "supporter" - encouraging, cheerleader
-- "observer" - detached, watching, slow
-- "wildcard" - unpredictable, varying pace
+${availableRoles
+  .map((role) => `- "${role}" - ${roleDescriptions[role]}`)
+  .join("\n")}
 
 Choose roles that create interesting dynamics and contrast. Each character should embody their role in speech patterns and perspective.
 
@@ -235,11 +243,12 @@ Output ONLY this JSON (no markdown, no explanations):
     {
       "id": "lowercase-kebab-case",
       "name": "Full Name (realistic, culturally appropriate)",
+      "gender": "male OR female (choose based on the character)",
       "role": "MUST be ONE of the 20 standardized roles listed above (e.g., 'emotional', 'analytical', 'provocateur')",
-      "image": "https://i.pravatar.cc/300?img=NUMBER (use 1-70, vary by perceived age/gender)",
+      "image": "LEAVE EMPTY - will be auto-assigned",
       "borderColor": "#HEXCODE (use vibrant: purples, teals, oranges, pinks, not muted)",
       "gradient": "linear-gradient(DEGdeg, #HEXCODE, #000000) (match borderColor, vary angle 120-240)",
-      "voiceId": "aura-2-athena-en (female) | aura-2-thalia-en (female) | aura-2-orion-en (male) | aura-2-luna-en (female) | aura-2-zeus-en (male) | aura-2-sol-en (male)"
+      "voiceId": "LEAVE EMPTY - will be auto-assigned"
     }
   ],
   "dialogue": [
@@ -322,17 +331,26 @@ export function usePerspectives() {
         throw new Error("Invalid story structure");
       }
 
+      // Track used avatar IDs to ensure uniqueness
+      const usedAvatarIds = new Set<number>();
+
       // Ensure all characters have required fields
-      const characters = parsed.characters.slice(0, 6).map((char, index) => ({
-        id: char.id || `character-${index}`,
-        name: char.name || `Character ${index + 1}`,
-        role: char.role || "Participant",
-        image:
-          char.image || `https://i.pravatar.cc/300?img=${(index + 10) * 5}`,
-        borderColor: char.borderColor || "#4F46E5",
-        gradient: char.gradient || "linear-gradient(145deg, #4F46E5, #000)",
-        voiceId: char.voiceId || voicePool[index % voicePool.length],
-      }));
+      const characters = parsed.characters.slice(0, 6).map((char, index) => {
+        const gender = char.gender || (index % 2 === 0 ? "male" : "female");
+        const avatarId = getRandomAvatarId(gender, usedAvatarIds);
+        usedAvatarIds.add(avatarId);
+
+        return {
+          id: char.id || `character-${index}`,
+          name: char.name || `Character ${index + 1}`,
+          gender: gender,
+          role: char.role || "Participant",
+          image: `https://i.pravatar.cc/300?img=${avatarId}`,
+          borderColor: char.borderColor || "#4F46E5",
+          gradient: char.gradient || "linear-gradient(145deg, #4F46E5, #000)",
+          voiceId: getRandomVoice(gender),
+        };
+      });
 
       const story: StoryData = {
         characters,
