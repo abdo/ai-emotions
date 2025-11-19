@@ -26,6 +26,7 @@ export function TheatrePage() {
     currentDialogueIndex,
     volume,
     isPaused,
+    hasEnded,
     handleVolumeChange,
     togglePause,
     downloadConversation,
@@ -43,6 +44,13 @@ export function TheatrePage() {
     fetchStory(topic);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, navigate]); // Only depend on topic and navigate, not the functions
+
+  // Stop audio when component unmounts (navigating away)
+  useEffect(() => {
+    return () => {
+      stopAudio();
+    };
+  }, [stopAudio]);
 
   useEffect(() => {
     if (!story || !story.characters.length || !story.dialogue.length) return;
@@ -89,21 +97,28 @@ export function TheatrePage() {
   // Get the character currently speaking
   const speakingCharacterId = useMemo(() => {
     if (currentDialogueIndex === -1 || !story) return null;
-    const characterId = story.dialogue[currentDialogueIndex]?.characterId || null;
-    console.log(`[Highlight] Index: ${currentDialogueIndex}, CharacterId: ${characterId}`);
+    const characterId =
+      story.dialogue[currentDialogueIndex]?.characterId || null;
+    console.log(
+      `[Highlight] Index: ${currentDialogueIndex}, CharacterId: ${characterId}`
+    );
     return characterId;
   }, [currentDialogueIndex, story]);
 
   return (
     <div className="theatre-page">
-      <button className="back-arrow-btn" onClick={handleBack} aria-label="Go back">
+      <button
+        className="back-arrow-btn"
+        onClick={handleBack}
+        aria-label="Go back"
+      >
         ← Back
       </button>
 
       {conversationStarted && (
         <>
           <VolumeControl volume={volume} onVolumeChange={handleVolumeChange} />
-          
+
           <div className="theatre-lights">
             <div className="light1">
               <div className="ray"></div>
@@ -159,9 +174,9 @@ export function TheatrePage() {
                     className="drawer-action-btn drawer-icon-btn"
                     onClick={togglePause}
                   >
-                    {isPaused ? (
+                    {hasEnded || isPaused ? (
                       <>
-                        <PlayIcon /> Resume
+                        <PlayIcon /> {hasEnded ? "Play Again" : "Resume"}
                       </>
                     ) : (
                       <>
@@ -189,9 +204,11 @@ export function TheatrePage() {
                 <button
                   className="side-action-btn pause-side-btn"
                   onClick={togglePause}
-                  title={isPaused ? "Resume" : "Pause"}
+                  title={
+                    hasEnded ? "Play Again" : isPaused ? "Resume" : "Pause"
+                  }
                 >
-                  {isPaused ? <PlayIcon /> : <PauseIcon />}
+                  {hasEnded || isPaused ? <PlayIcon /> : <PauseIcon />}
                 </button>
                 <button
                   className="side-action-btn replay-side-btn"
@@ -251,4 +268,3 @@ export function TheatrePage() {
     </div>
   );
 }
-

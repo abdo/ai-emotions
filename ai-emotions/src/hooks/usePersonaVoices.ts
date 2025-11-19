@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { openAiTTSApiKey } from "../keys.ignore";
 import type { Character, DialogueLine } from "./usePerspectives";
-import { cleanTextForSpeech } from "../lib/textCleaner";
+import { extractToneAndCleanText } from "../lib/textCleaner";
 import {
   type CharacterRole,
   availableRoles,
@@ -153,8 +153,10 @@ export function usePersonaVoices() {
   const [currentDialogueIndex, setCurrentDialogueIndex] = useState<number>(-1);
   const [volume, setVolume] = useState<number>(100);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [hasEnded, setHasEnded] = useState<boolean>(false);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const unlockedRef = useRef(false);
+  const totalLinesRef = useRef<number>(0);
 
   const unlockAudio = useCallback(() => {
     unlockedRef.current = true;
@@ -206,12 +208,15 @@ export function usePersonaVoices() {
           }
 
           try {
-            // Clean the text before sending to TTS
-            const cleanedText = cleanTextForSpeech(line.text);
+            // Extract tone and clean the text before sending to TTS
+            const { cleanedText, tone } = extractToneAndCleanText(line.text);
 
-            // Get role-based configuration for instructions
+            // Get role-based configuration for base instructions
             const characterRole = extractRole(character.role);
             const roleConfig = roleVoiceConfigs[characterRole];
+
+            // Use extracted tone if available, otherwise fall back to role description
+            const instructions = tone || roleConfig.instructions;
 
             // Use the character's assigned voiceId (gender-appropriate from usePerspectives)
             const voiceId = character.voiceId;
@@ -226,9 +231,10 @@ export function usePersonaVoices() {
             console.log(
               `[Voice ${index}] ${character.name} (${character.gender}, ${characterRole}): voice=${voiceId}, model=gpt-4o-mini-tts`
             );
-            console.log(
-              `  Instructions: ${roleConfig.instructions.substring(0, 80)}...`
-            );
+            console.log(`  Base: ${roleConfig.instructions}`);
+            if (tone) {
+              console.log(`  Tone: ${tone}`);
+            }
 
             const response = await fetch(
               "https://api.openai.com/v1/audio/speech",
@@ -243,7 +249,7 @@ export function usePersonaVoices() {
                   voice: voiceId,
                   speed: 1.1,
                   input: cleanedText,
-                  instructions: roleConfig.instructions,
+                  instructions: instructions,
                 }),
               }
             );
@@ -333,7 +339,9 @@ export function usePersonaVoices() {
         const audioElement = new Audio(audio.audioSrc);
         audioElement.volume = volume / 100;
         currentAudioRef.current = audioElement;
-        console.log(`[Playback] Index: ${index}, CharacterId: ${audio.characterId}`);
+        console.log(
+          `[Playback] Index: ${index}, CharacterId: ${audio.characterId}`
+        );
         setCurrentDialogueIndex(index);
 
         audioElement.onended = () => {
@@ -363,10 +371,15 @@ export function usePersonaVoices() {
   const playAllDialogue = useCallback(
     (totalLines: number) => {
       let currentIndex = 0;
+      totalLinesRef.current = totalLines;
+      setHasEnded(false);
+      setIsPaused(false);
 
       const playNext = () => {
         if (currentIndex >= totalLines) {
           setCurrentDialogueIndex(-1);
+          setHasEnded(true);
+          setIsPaused(false);
           return;
         }
         const isFirst = currentIndex === 0;
@@ -390,6 +403,7 @@ export function usePersonaVoices() {
     currentAudioRef.current?.pause();
     setCurrentDialogueIndex(-1);
     setIsPaused(false);
+    setHasEnded(false);
   }, []);
 
   const pauseAudio = useCallback(() => {
@@ -409,12 +423,15 @@ export function usePersonaVoices() {
   }, [isPaused]);
 
   const togglePause = useCallback(() => {
-    if (isPaused) {
+    if (hasEnded) {
+      // If conversation ended, replay from beginning
+      playAllDialogue(totalLinesRef.current);
+    } else if (isPaused) {
       resumeAudio();
     } else {
       pauseAudio();
     }
-  }, [isPaused, pauseAudio, resumeAudio]);
+  }, [hasEnded, isPaused, pauseAudio, resumeAudio, playAllDialogue]);
 
   const downloadConversation = useCallback(async () => {
     try {
@@ -435,8 +452,11 @@ export function usePersonaVoices() {
       }
 
       // Create audio context
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+      const audioContext = new AudioContextClass();
 
       // Decode all audio data
       const audioBuffers = await Promise.all(
@@ -521,6 +541,7 @@ export function usePersonaVoices() {
     currentDialogueIndex,
     volume,
     isPaused,
+    hasEnded,
     handleVolumeChange,
     generateAllVoices,
     playDialogue,

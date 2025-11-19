@@ -84,11 +84,24 @@ Make it sound REAL:
 - Natural cadence: short + long sentences, vary rhythm
 - Regional or generational speech patterns (subtle, not stereotypical)
 
-Stage directions [in brackets]:
-- Physical actions that reveal emotion: [lights cigarette], [avoids eye contact]
-- Tonal shifts: [voice breaking], [laughing bitterly], [whispering intensely]
-- Reactions: [visibly hurt], [stunned silence], [nodding slowly]
-- Use sparingly but powerfully
+**CRITICAL: Emotional Tone Annotations**
+Every dialogue line MUST end with a tone/emotion annotation in square brackets. This controls voice delivery.
+
+Format: "Dialogue text here [tone/emotion]"
+
+Examples:
+- "I can't believe you did that [angry]"
+- "Maybe you're right... I don't know [uncertain, vulnerable]"
+- "That's exactly what I've been saying! [excited, vindicated]"
+- "Whatever. Do what you want [dismissive, hurt]"
+
+Tone guidelines:
+- Be specific: not just "sad" but "heartbroken" or "disappointed"
+- Combine emotions when layered: [angry, defensive] or [hopeful, nervous]
+- Match the character's emotional arc through the conversation
+- Vary tones even for the same character - people's emotions shift!
+
+Common tones: angry, sad, excited, scared, cynical, hopeful, desperate, defensive, playful, serious, bitter, warm, cold, intense, calm, breaking, raw, gentle, harsh, proud, ashamed, confident, insecure
 
 Each line must:
 - Either raise stakes, reveal character depth, or shift perspective
@@ -137,4 +150,3 @@ Output ONLY this JSON (no markdown, no explanations):
 }
 
 Remember: This is theatre. Every word matters. Make it unforgettable.`;
-

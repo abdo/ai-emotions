@@ -1,4 +1,3 @@
-import React from "react";
 import "./VolumeControl.css";
 
 type VolumeControlProps = {
