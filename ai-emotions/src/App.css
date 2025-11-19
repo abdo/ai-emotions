@@ -222,6 +222,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  opacity: 0.3;
 }
 
 .theatre-lights .light1 {
@@ -273,6 +274,7 @@
 .results-header {
   max-width: 1000px;
   margin: 0 auto 3rem;
+  margin-top: 4rem;
   text-align: center;
   position: relative;
   z-index: 1;
@@ -357,7 +359,7 @@
 
 .play-story-btn {
   display: block;
-  margin: 0 auto 3rem;
+  margin: 0 auto 1rem;
   padding: 1.2rem 3rem;
   font-size: 1.15rem;
   font-weight: 600;
@@ -382,31 +384,143 @@
   transform: translateY(0);
 }
 
-.replay-btn {
-  display: block;
-  margin: 0 auto 3rem;
-  padding: 1rem 2.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+.play-story-btn.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Mobile Drawer */
+.mobile-drawer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.drawer-toggle {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
   border: none;
-  border-radius: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.drawer-content {
+  max-height: 0;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: max-height 0.3s ease;
+}
+
+.drawer-content.open {
+  max-height: 300px;
+}
+
+.drawer-action-btn {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.drawer-action-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.drawer-action-btn:last-child {
+  border-bottom: none;
+}
+
+/* Desktop Side Actions */
+.side-actions {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.side-action-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
-  position: relative;
-  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  color: #fff;
 }
 
-.replay-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+.side-action-btn svg {
+  width: 24px;
+  height: 24px;
 }
 
-.replay-btn:active {
-  transform: translateY(0);
+.side-action-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.drawer-icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.drawer-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mobile-drawer {
+    display: block;
+  }
+
+  .side-actions {
+    display: none;
+  }
+
+  .back-arrow-btn {
+    display: none;
+  }
+
+  .results-header {
+    margin-top: 5rem;
+  }
 }
 
 .dialogue-display {

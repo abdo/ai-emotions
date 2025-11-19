@@ -297,6 +297,20 @@ export function usePerspectives() {
     }));
 
     try {
+      // Check for mock mode
+      const isMock = localStorage.getItem("mock") === "true";
+      if (isMock) {
+        const cachedStory = localStorage.getItem("mock_story");
+        if (cachedStory) {
+          console.log("Using cached mock story");
+          const story = JSON.parse(cachedStory) as StoryData;
+          // Add small artificial delay to simulate loading
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          setState({ story, isLoading: false, error: null });
+          return;
+        }
+      }
+
       const response = await axios.post(
         "https://api.groq.com/openai/v1/chat/completions",
         {
@@ -369,6 +383,13 @@ export function usePerspectives() {
         characters,
         dialogue: parsed.dialogue,
       };
+
+      // Cache the story for mock mode
+      try {
+        localStorage.setItem("mock_story", JSON.stringify(story));
+      } catch (e) {
+        console.warn("Failed to cache story to localStorage", e);
+      }
 
       setState({ story, isLoading: false, error: null });
     } catch (error) {

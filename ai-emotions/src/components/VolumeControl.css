@@ -1,0 +1,57 @@
+.volume-control-wrapper {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 10;
+}
+
+.volume-slider {
+  position: relative;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.volume-icon {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  width: 25px;
+  height: auto;
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+}
+
+.volume-level {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 50px;
+  background: rgb(82, 82, 82);
+  overflow: hidden;
+  border-radius: 9px;
+  transition: height 0.1s;
+  cursor: pointer;
+  transform: rotate(270deg);
+}
+
+.volume-level::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 0;
+  height: 0;
+  box-shadow: -200px 0 0 200px #fff;
+}
+
+.volume-level::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: -200px 0 0 200px #fff;
+}

@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import ChromaGrid from "./components/ChromaGrid";
 import { LandingPage } from "./components/LandingPage/LandingPage";
+import { VolumeControl } from "./components/VolumeControl";
+import { DownloadIcon } from "./components/icons/DownloadIcon";
+import { ReplayIcon } from "./components/icons/ReplayIcon";
+import { PauseIcon } from "./components/icons/PauseIcon";
+import { PlayIcon } from "./components/icons/PlayIcon";
 import "./App.css";
 import { usePerspectives } from "./hooks/usePerspectives";
 import { usePersonaVoices } from "./hooks/usePersonaVoices";
@@ -18,6 +23,11 @@ function App() {
     unlockAudio,
     isGenerating,
     currentDialogueIndex,
+    volume,
+    isPaused,
+    handleVolumeChange,
+    togglePause,
+    downloadConversation,
   } = usePersonaVoices();
 
   const handleStartStory = async (topic: string) => {
@@ -92,6 +102,8 @@ function App() {
             ← Back
           </button>
 
+          <VolumeControl volume={volume} onVolumeChange={handleVolumeChange} />
+
           {conversationStarted && (
             <div className="theatre-lights">
               <div className="light1">
@@ -120,16 +132,95 @@ function App() {
 
           {allVoicesReady && gridItems.length > 0 && (
             <>
-              {!conversationStarted && (
-                <button className="play-story-btn" onClick={startConversation}>
-                  ▶ Play the conversation
-                </button>
-              )}
+              <button
+                className={`play-story-btn ${
+                  conversationStarted ? "hidden" : ""
+                }`}
+                onClick={startConversation}
+              >
+                ▶ Start the show
+              </button>
 
               {conversationStarted && (
-                <button className="replay-btn" onClick={replayConversation}>
-                  🔁 Replay
-                </button>
+                <>
+                  {/* Mobile drawer */}
+                  <div className="mobile-drawer">
+                    <button
+                      className="drawer-toggle"
+                      onClick={() => {
+                        const drawer =
+                          document.querySelector(".drawer-content");
+                        drawer?.classList.toggle("open");
+                      }}
+                    >
+                      ☰ Actions
+                    </button>
+                    <div className="drawer-content">
+                      <button
+                        className="drawer-action-btn"
+                        onClick={() => {
+                          stopAudio();
+                          setConversationStarted(false);
+                          setHasSubmitted(false);
+                          setUserTopic("");
+                        }}
+                      >
+                        ← Back
+                      </button>
+                      <button
+                        className="drawer-action-btn drawer-icon-btn"
+                        onClick={togglePause}
+                      >
+                        {isPaused ? (
+                          <>
+                            <PlayIcon /> Resume
+                          </>
+                        ) : (
+                          <>
+                            <PauseIcon /> Pause
+                          </>
+                        )}
+                      </button>
+                      <button
+                        className="drawer-action-btn drawer-icon-btn"
+                        onClick={replayConversation}
+                      >
+                        <ReplayIcon /> Replay
+                      </button>
+                      <button
+                        className="drawer-action-btn drawer-icon-btn"
+                        onClick={downloadConversation}
+                      >
+                        <DownloadIcon /> Download
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Desktop side buttons */}
+                  <div className="side-actions">
+                    <button
+                      className="side-action-btn pause-side-btn"
+                      onClick={togglePause}
+                      title={isPaused ? "Resume" : "Pause"}
+                    >
+                      {isPaused ? <PlayIcon /> : <PauseIcon />}
+                    </button>
+                    <button
+                      className="side-action-btn replay-side-btn"
+                      onClick={replayConversation}
+                      title="Replay"
+                    >
+                      <ReplayIcon />
+                    </button>
+                    <button
+                      className="side-action-btn download-side-btn"
+                      onClick={downloadConversation}
+                      title="Download"
+                    >
+                      <DownloadIcon />
+                    </button>
+                  </div>
+                </>
               )}
 
               <div className="grid-wrapper">
@@ -141,32 +232,6 @@ function App() {
                   selectedPersonaId={speakingCharacterId}
                 />
               </div>
-
-              {conversationStarted && (
-                <div className="dialogue-display">
-                  {story?.dialogue.map((line, index) => {
-                    const character = story.characters.find(
-                      (c) => c.id === line.characterId
-                    );
-                    const isActive = index === currentDialogueIndex;
-                    const hasPlayed = index < currentDialogueIndex;
-
-                    return (
-                      <div
-                        key={index}
-                        className={`dialogue-line ${isActive ? "active" : ""} ${
-                          hasPlayed ? "played" : ""
-                        }`}
-                      >
-                        <span className="character-name">
-                          {character?.name}:
-                        </span>{" "}
-                        <span className="dialogue-text">{line.text}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </>
           )}
         </div>
