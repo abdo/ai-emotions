@@ -18,6 +18,7 @@ export function TheatrePage() {
   const { story, fetchStory, isLoading, error } = usePerspectives();
 
   const {
+    audioMap,
     generateAllVoices,
     playAllDialogue,
     stopAudio,
@@ -91,8 +92,14 @@ export function TheatrePage() {
 
   const allVoicesReady = useMemo(() => {
     if (!story || isGenerating) return false;
-    return story.dialogue.length > 0;
-  }, [story, isGenerating]);
+    if (story.dialogue.length === 0) return false;
+    
+    // Check if all dialogue lines have ready audio
+    return story.dialogue.every((_, index) => {
+      const audio = audioMap[index];
+      return audio && audio.status === "ready" && audio.audioSrc;
+    });
+  }, [story, isGenerating, audioMap]);
 
   // Get the character currently speaking
   const speakingCharacterId = useMemo(() => {
@@ -133,11 +140,11 @@ export function TheatrePage() {
       <div className="theatre-header">
         <p className="scenario-text">"{topic}"</p>
         <div className="status-line">
-          {isLoading && <span className="status">Writing the scene...</span>}
-          {!isLoading && isGenerating && (
-            <span className="status">Preparing voices...</span>
+          {isLoading && <span className="status">Preparing the scene...</span>}
+          {!isLoading && !allVoicesReady && (
+            <span className="status">Calling actors...</span>
           )}
-          {!isLoading && !isGenerating && allVoicesReady && (
+          {allVoicesReady && (
             <span className="status-ready">Ready to play</span>
           )}
         </div>
