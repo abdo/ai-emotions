@@ -85,7 +85,7 @@ export function usePerspectives() {
 
   const isLoadingRef = useRef(false);
 
-  const fetchStory = useCallback(async (userInput: string) => {
+  const fetchStory = useCallback(async (userInput: string, userName?: string) => {
     if (!userInput.trim()) return;
 
     // Prevent duplicate calls
@@ -117,6 +117,24 @@ export function usePerspectives() {
         }
       }
 
+      // Build the prompt with userName if provided
+      let promptContent = storyGenerationPrompt().replace(
+        "[will be inserted]",
+        userInput.trim()
+      );
+      
+      if (userName) {
+        promptContent = promptContent.replaceAll(
+          "[USER_NAME]",
+          userName
+        );
+      } else {
+        promptContent = promptContent.replaceAll(
+          "[USER_NAME]",
+          "their friend"
+        );
+      }
+
       const response = await axios.post(
         "https://api.groq.com/openai/v1/chat/completions",
         {
@@ -126,10 +144,7 @@ export function usePerspectives() {
           messages: [
             {
               role: "system",
-              content: storyGenerationPrompt.replace(
-                "[will be inserted]",
-                userInput.trim()
-              ),
+              content: promptContent,
             },
             {
               role: "user",

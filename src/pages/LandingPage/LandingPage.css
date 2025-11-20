@@ -270,6 +270,51 @@
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
 }
 
+.name-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  color: white;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.name-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.name-input:focus {
+  outline: none;
+  border-color: #a855f7;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+}
+
+.name-input-wrapper {
+  position: relative;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.name-input-wrapper .name-input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.optional-label {
+  position: absolute;
+  right: 1.5rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.875rem;
+  pointer-events: none;
+  font-style: italic;
+}
+
 .submit-button {
   width: 100%;
   background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);

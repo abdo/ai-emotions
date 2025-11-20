@@ -32,119 +32,20 @@ const roleVoiceConfigs: Record<CharacterRole, VoiceConfig> = Object.fromEntries(
 ) as Record<CharacterRole, VoiceConfig>;
 
 // Extract standardized role from character's role text
+// Since AI is instructed to use exact role names, this is just a safety fallback
 const extractRole = (roleText: string): CharacterRole => {
-  const normalized = roleText.toLowerCase();
-
-  // Match keywords to standardized roles
-  if (
-    normalized.includes("empathetic") ||
-    normalized.includes("empathy") ||
-    normalized.includes("bridge")
-  )
-    return "empathetic";
-  if (
-    normalized.includes("analytical") ||
-    normalized.includes("analyzer") ||
-    normalized.includes("rational")
-  )
-    return "analytical";
-  if (
-    normalized.includes("provocateur") ||
-    normalized.includes("challenge") ||
-    normalized.includes("provocative")
-  )
-    return "provocateur";
-  if (
-    normalized.includes("emotional") ||
-    normalized.includes("raw") ||
-    normalized.includes("passionate")
-  )
-    return "emotional";
-  if (normalized.includes("calm") || normalized.includes("peaceful"))
-    return "calm";
-  if (
-    normalized.includes("assertive") ||
-    normalized.includes("confident") ||
-    normalized.includes("bold")
-  )
-    return "assertive";
-  if (
-    normalized.includes("skeptical") ||
-    normalized.includes("doubtful") ||
-    normalized.includes("questioning")
-  )
-    return "skeptical";
-  if (
-    normalized.includes("optimistic") ||
-    normalized.includes("hopeful") ||
-    normalized.includes("positive")
-  )
-    return "optimistic";
-  if (
-    normalized.includes("cynical") ||
-    normalized.includes("pessimistic") ||
-    normalized.includes("jaded")
-  )
-    return "cynical";
-  if (
-    normalized.includes("nurturing") ||
-    normalized.includes("caring") ||
-    normalized.includes("supportive")
-  )
-    return "nurturing";
-  if (
-    normalized.includes("intense") ||
-    normalized.includes("fierce") ||
-    normalized.includes("powerful")
-  )
-    return "intense";
-  if (
-    normalized.includes("playful") ||
-    normalized.includes("lighthearted") ||
-    normalized.includes("fun")
-  )
-    return "playful";
-  if (
-    normalized.includes("serious") ||
-    normalized.includes("grave") ||
-    normalized.includes("solemn")
-  )
-    return "serious";
-  if (normalized.includes("wise") || normalized.includes("sage")) return "wise";
-  if (
-    normalized.includes("rebellious") ||
-    normalized.includes("rebel") ||
-    normalized.includes("defiant")
-  )
-    return "rebellious";
-  if (
-    normalized.includes("mediator") ||
-    normalized.includes("peacemaker") ||
-    normalized.includes("neutral")
-  )
-    return "mediator";
-  if (
-    normalized.includes("challenger") ||
-    normalized.includes("confrontational")
-  )
-    return "challenger";
-  if (normalized.includes("supporter") || normalized.includes("cheerleader"))
-    return "supporter";
-  if (
-    normalized.includes("observer") ||
-    normalized.includes("watcher") ||
-    normalized.includes("detached")
-  )
-    return "observer";
-  if (
-    normalized.includes("wildcard") ||
-    normalized.includes("wild card") ||
-    normalized.includes("unpredictable")
-  )
-    return "wildcard";
-
-  // Default fallback
-  return "mediator";
+  const normalized = roleText.toLowerCase().trim();
+  
+  // Check if it's an exact match with any role
+  if (availableRoles.includes(normalized as CharacterRole)) {
+    return normalized as CharacterRole;
+  }
+  
+  // Otherwise, find the first role that the text includes
+  const matchedRole = availableRoles.find(role => normalized.includes(role));
+  
+  // Fallback to mediator if no match
+  return matchedRole || "mediator";
 };
 
 export function usePersonaVoices() {

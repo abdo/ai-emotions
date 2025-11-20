@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import theatreImage from "../../assets/theatre.webp";
@@ -13,11 +13,32 @@ const examplePrompts = [
 
 export function LandingPage() {
   const [input, setInput] = useState("");
+  const [name, setName] = useState("");
   const navigate = useNavigate();
+
+  // Load saved name from localStorage on mount
+  useEffect(() => {
+    const savedName = localStorage.getItem("userName");
+    if (savedName) {
+      setName(savedName);
+    }
+  }, []);
 
   const handleSubmit = (text: string) => {
     if (text.trim()) {
-      navigate("/theatre", { state: { topic: text.trim() } });
+      const finalName = name.trim();
+      
+      // Save name to localStorage if provided
+      if (finalName) {
+        localStorage.setItem("userName", finalName);
+      }
+      
+      navigate("/theatre", { 
+        state: { 
+          topic: text.trim(),
+          name: finalName || undefined 
+        } 
+      });
     }
   };
 
@@ -80,6 +101,23 @@ export function LandingPage() {
                 }
               }}
             />
+            
+            <div className="name-input-wrapper">
+              <input
+                type="text"
+                className="name-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                    handleSubmit(input);
+                  }
+                }}
+              />
+              <span className="optional-label">(optional)</span>
+            </div>
+            
             <button
               className="submit-button"
               onClick={() => handleSubmit(input)}

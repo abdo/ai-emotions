@@ -13,7 +13,11 @@ import "./TheatrePage.css";
 export function TheatrePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const topic = (location.state as { topic?: string })?.topic || "";
+  const topic = (location.state as { topic?: string; name?: string })?.topic || "";
+  const routerName = (location.state as { topic?: string; name?: string })?.name;
+  
+  // Use name from router state, or fall back to localStorage, or undefined
+  const userName = routerName || localStorage.getItem("userName") || undefined;
 
   const { story, fetchStory, isLoading, error } = usePerspectives();
 
@@ -42,9 +46,9 @@ export function TheatrePage() {
       return;
     }
     unlockAudio();
-    fetchStory(topic);
+    fetchStory(topic, userName);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topic, navigate]); // Only depend on topic and navigate, not the functions
+  }, [topic, userName, navigate]); // Only depend on topic, userName, and navigate, not the functions
 
   // Stop audio when component unmounts (navigating away)
   useEffect(() => {

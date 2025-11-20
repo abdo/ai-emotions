@@ -25,6 +25,10 @@ export const roleDescriptions = {
   supporter: "encouraging, cheerleader",
   observer: "detached, watching, slow",
   wildcard: "unpredictable, varying pace",
+  curious: "inquisitive, exploring, engaged",
+  compassionate: "deeply caring, warm, gentle",
+  humorous: "witty, light, playful timing",
+  thoughtful: "reflective, considering, measured",
 } as const;
 
 // Derive everything else from roleDescriptions
