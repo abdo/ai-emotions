@@ -18,6 +18,7 @@ Enter a situation, choose your mode, and watch as a cast of AI characters with u
 
 - **Core**: React 18, TypeScript, Vite
 - **AI**: Groq API, OpenAI TTS API
+- **Analytics**: PostHog
 - **Animation**: GSAP (GreenSock), OGL (WebGL)
 - **Routing**: React Router v6
 - **Styling**: Vanilla CSS (Component-scoped)
@@ -43,13 +44,24 @@ Enter a situation, choose your mode, and watch as a cast of AI characters with u
     ```
 
 3.  **Configure API Keys**
-    Create a file named `src/keys.ignore.ts` (this file is git-ignored for security).
-    Add your keys:
+    > [!IMPORTANT]
+    > This project relies on a `src/keys.ignore.ts` file to manage API keys securely. This file is git-ignored to prevent accidental leaks.
+
+    Create a file named `src/keys.ignore.ts` and add the following exports:
+
     ```typescript
     // src/keys.ignore.ts
+    
+    // Groq API Key (for story generation)
+    // Get it here: https://console.groq.com/keys
     export const groqApiKey = "gsk_...";
+
+    // OpenAI API Key (for voice synthesis)
+    // Get it here: https://platform.openai.com/api-keys
     export const openAiTTSApiKey = "sk-proj-...";
     ```
+
+    **Note:** If this file is missing or keys are empty, the app will show an error screen.
 
 4.  **Run the development server**
     ```bash
@@ -75,6 +87,11 @@ Enter a situation, choose your mode, and watch as a cast of AI characters with u
 - `src/components`: Reusable UI (`ChromaGrid`, `ModeSwitch`)
 - `src/hooks`: AI logic (`usePerspectives`, `usePersonaVoices`)
 - `src/constants`: Prompts and character definitions
+
+## ❓ Troubleshooting
+
+### "Configuration Missing" Screen?
+Ensure you have created `src/keys.ignore.ts` with valid API keys. See the **Installation** section.
 
 ## 📄 License
 
