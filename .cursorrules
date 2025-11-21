@@ -2,7 +2,11 @@
 
 ## Project Overview
 
-**AI Show** is a React + TypeScript web application that creates cinematic, AI-generated conversations from user situations. It uses:
+**AI Show** is a React + TypeScript web application that creates cinematic, AI-generated conversations from user situations. It offers two distinct modes:
+1.  **Story Mode**: A cinematic re-enactment of the user's situation ("Show, Don't Tell").
+2.  **Conversation Mode**: A deep discussion/debate between friends about the situation.
+
+It uses:
 - **Groq AI** (`llama-3.3-70b-versatile`) for generating dramatic character dialogues
 - **OpenAI TTS** (`gpt-4o-mini-tts`) for realistic, persona-based voice generation
 - **React 18 + Vite + React Router** for modern SPA development
@@ -41,7 +45,7 @@ The app generates 3-6 distinct characters with unique voices, personalities, and
 src/
 ├── pages/                       # Route pages
 │   ├── LandingPage/
-│   │   ├── LandingPage.tsx      # Hero + input (route: /)
+│   │   ├── LandingPage.tsx      # Hero + input + mode switch (route: /)
 │   │   └── LandingPage.css
 │   └── TheatrePage/
 │       ├── TheatrePage.tsx      # Theatre mode (route: /theatre)
@@ -50,21 +54,20 @@ src/
 │   ├── ChromaGrid/
 │   │   ├── ChromaGrid.tsx       # Interactive character grid
 │   │   └── ChromaGrid.css
+│   ├── ModeSwitch/
+│   │   ├── ModeSwitch.tsx       # Cookie-themed toggle (Story/Conversation)
+│   │   └── ModeSwitch.css
 │   └── VolumeControl/
 │       ├── VolumeControl.tsx    # Audio volume slider
 │       └── VolumeControl.css
 ├── ui/                          # UI primitives
 │   └── icons/                   # SVG icon components
-│       ├── DownloadIcon.tsx
-│       ├── ReplayIcon.tsx
-│       ├── PauseIcon.tsx
-│       └── PlayIcon.tsx
 ├── hooks/                       # Custom React hooks
-│   ├── usePerspectives.ts       # Groq AI story generation
+│   ├── usePerspectives.ts       # Groq AI story generation (handles modes)
 │   └── usePersonaVoices.ts      # OpenAI TTS voice management
 ├── constants/                   # Static configuration
 │   ├── theatreCharacters.ts     # Character roles & voice config
-│   ├── prompts.ts              # AI prompts & conversation dynamics
+│   ├── prompts.ts              # AI prompts (Shared + Mode-Specific)
 │   └── demoData.ts             # Fallback/mock story data
 ├── lib/                        # Utility functions
 │   ├── avatarConstants.ts      # Gender-specific avatar pools
@@ -81,11 +84,12 @@ src/
 
 ```
 / (LandingPage)
-  → User enters situation
-  → Navigates to /theatre with state
+  → User enters situation + optional name
+  → User selects Mode (Story vs Conversation)
+  → Navigates to /theatre with state: { topic, mode, name }
 
 /theatre (TheatrePage)
-  → Fetches story from Groq
+  → Fetches story from Groq using mode-specific prompt
   → Generates voices from OpenAI
   → Plays conversation
   → Redirects to / if no topic
@@ -97,56 +101,59 @@ src/
 
 ### 1. Story Generation Flow
 
-1. User enters a situation on `/` (LandingPage)
-2. Navigate to `/theatre` with `{ state: { topic } }`
-3. `usePerspectives` sends to Groq AI with detailed prompt from `constants/prompts.ts`
-4. AI returns 3-6 characters with:
-   - Name, gender, role (from 20 standardized roles in `constants/theatreCharacters.ts`)
-   - Border colors and gradients
-   - 14-18 dialogue lines
-5. Characters get:
-   - Gender-appropriate avatars (from `lib/avatarConstants.ts`)
-   - Gender-appropriate OpenAI voices (avoids repetition when possible)
-   - Role-based TTS instructions (from `constants/theatreCharacters.ts`)
+1.  User enters a situation on `/` (LandingPage)
+2.  Navigate to `/theatre` with `{ state: { topic, mode, name } }`
+3.  `usePerspectives` calls `storyGenerationPrompt(mode)` in `constants/prompts.ts`
+4.  **Prompt Construction**:
+    *   **Shared Instructions**: Character depth, roles, dialogue craft, JSON format.
+    *   **Mode-Specific Framing**:
+        *   *Story*: "Re-enact this scene", "Show don't tell", "In Media Res".
+        *   *Conversation*: "Discuss this topic", "Debate", "Random Scenario".
+    *   **Structure**:
+        *   *Story*: Hook -> Action -> Fallout.
+        *   *Conversation*: Act 1 -> Act 2 -> Act 3.
+5.  AI returns JSON with characters and dialogue.
 
-### 2. Voice System
+### 2. Modes
+
+**Story Mode (Default)**
+*   **Goal**: Cinematic re-enactment of the event.
+*   **Prompting**: Enforces "Show, Don't Tell". Starts *in media res* (in the middle of action).
+*   **Structure**: Hook -> Action -> Fallout.
+*   **User Inclusion**: Only included if they are a direct participant in the scene.
+
+**Conversation Mode**
+*   **Goal**: Friends discussing/debating the event.
+*   **Prompting**: Discussing *about* the user's situation.
+*   **Structure**: Act 1 (Opening) -> Act 2 (Conflict) -> Act 3 (Climax).
+*   **Dynamics**: Injects a random "Conversation Scenario" (e.g., "Devil's Advocate", "Unexpected Agreement") to keep discussions fresh.
+
+### 3. Voice System
 
 **20 Standardized Roles** (defined in `constants/theatreCharacters.ts`):
 - Single source of truth: `roleDescriptions` object
-- Type and array derived from it: `CharacterRole`, `availableRoles`
 - Roles: empathetic, analytical, provocateur, emotional, calm, assertive, skeptical, optimistic, cynical, nurturing, intense, playful, serious, wise, rebellious, mediator, challenger, supporter, observer, wildcard
 
 Each role maps to:
 - **Instructions** for OpenAI TTS (e.g., "raw, expressive, passionate")
-- **Voice pool** by gender:
-  - Males: onyx, ash, echo (3 voices)
-  - Females: alloy, nova, shimmer, sage, coral (5 voices)
+- **Voice pool** by gender (Onyx, Ash, Echo, Alloy, Nova, Shimmer, Sage, Coral)
 
 **Voice Selection Logic**:
 - Tracks `usedVoices` Set per story generation
 - Picks from unused voices first (to avoid repetition)
 - Falls back to random if all voices exhausted
-- Male characters: can repeat after 3 males
-- Female characters: can repeat after 5 females
 
-### 3. Text-to-Speech Pipeline
+### 4. Text-to-Speech Pipeline
 
-1. User clicks "Start the show"
-2. Browser requests user interaction (autoplay policy bypass)
-3. `usePersonaVoices` generates all voices in parallel:
-   - Cleans text via `lib/textCleaner.ts` (removes markdown, emojis, stage directions)
-   - Calls OpenAI TTS with role-based instructions
-   - Converts response to base64 `data:audio/mp3` URI
-4. Plays dialogue sequentially with 100ms gap between lines
-5. First audio has 600ms delay to prevent cutoff
-6. Highlights speaking character in ChromaGrid
-
-### 4. Audio Features
-
-- **Volume Control**: Real-time adjustment via `VolumeControl` component
-- **Pause/Resume**: Toggle playback without losing position
-- **Replay**: Restart conversation without re-fetching
-- **Download**: Combine all audio into single WAV file
+1.  User clicks "Start the show"
+2.  Browser requests user interaction (autoplay policy bypass)
+3.  `usePersonaVoices` generates all voices in parallel:
+    - Cleans text via `lib/textCleaner.ts` (removes markdown, emojis, stage directions)
+    - Calls OpenAI TTS with role-based instructions
+    - Converts response to base64 `data:audio/mp3` URI
+4.  Plays dialogue sequentially with 100ms gap between lines
+5.  First audio has 600ms delay to prevent cutoff
+6.  Highlights speaking character in ChromaGrid
 
 ---
 
@@ -156,113 +163,26 @@ Each role maps to:
 
 - **No `any`** - use `unknown` or proper types
 - **Explicit prop types** for all components
-- **Named exports** preferred (except main component per file)
-- **Type imports** when appropriate (`import type { ... }`)
+- **Named exports** preferred
 - **Derive types from data** when possible (single source of truth)
-
-Example:
-```typescript
-// Good: Derive type from constant
-export const roleDescriptions = { ... } as const;
-export type CharacterRole = keyof typeof roleDescriptions;
-
-// Bad: Maintain separately
-export type CharacterRole = "empathetic" | "analytical" | ...;
-export const roles = ["empathetic", "analytical", ...];
-```
 
 ### React Patterns
 
-- **Functional components only** (no classes)
+- **Functional components only**
 - **Hooks**: `useState`, `useEffect`, `useCallback`, `useMemo`, `useRef`
-- **Custom hooks** for complex logic (data fetching, voice management)
-- **Controlled components** for forms
 - **React Router** for navigation (use `navigate()`, `useLocation()`)
 
 ### State Management
 
 - **React hooks** for local state
-- **React Router state** for page-to-page data passing
-- **useMemo** for expensive computations
-- **useCallback** for stable function references
-- **useRef** for mutable values that don't trigger re-renders
-
-### Async Patterns
-
-Always handle:
-- ✅ Loading states (`isLoading`)
-- ✅ Error states (`error`)
-- ✅ Success states (`data`)
-- ✅ Cleanup (abort controllers, unmount flags)
-
-Example:
-```typescript
-const [state, setState] = useState({ data: null, isLoading: false, error: null });
-
-useEffect(() => {
-  let isMounted = true;
-  
-  async function fetch() {
-    setState(prev => ({ ...prev, isLoading: true }));
-    try {
-      const result = await apiCall();
-      if (isMounted) setState({ data: result, isLoading: false, error: null });
-    } catch (error) {
-      if (isMounted) setState({ data: null, isLoading: false, error: error.message });
-    }
-  }
-  
-  fetch();
-  return () => { isMounted = false; };
-}, []);
-```
+- **React Router state** for page-to-page data passing (topic, mode, name)
 
 ### Styling
 
 - **Plain CSS files** co-located with components
-- **Component-scoped classes** (e.g., `.landing-page`, `.theatre-page`)
-- **CSS custom properties** for theming (e.g., `--angle` for animations)
+- **Component-scoped classes**
+- **CSS custom properties** for theming
 - **Responsive**: use `clamp()`, `vw`, media queries
-- **Dark theme**: base is `#0a0a0a`, use rgba for overlays
-- **Mobile-first**: mobile drawer for actions, desktop side buttons
-
-### Performance
-
-- **Lazy load** heavy components if needed
-- **Memoize** expensive computations
-- **Parallel API calls** when independent (e.g., voice generation uses `Promise.all`)
-- **Avoid UI blocking**: set state immediately before async operations
-- **Audio optimization**: pre-generate all voices before playback
-
-### Organization
-
-- **Single source of truth**: derive types/arrays from constants
-- **Separation of concerns**:
-  - `pages/` - route components
-  - `components/` - reusable UI
-  - `ui/` - primitives (icons, buttons)
-  - `constants/` - static config
-  - `hooks/` - business logic
-  - `lib/` - utilities
-- **Co-location**: keep component CSS with component file
-- **Consistent structure**: each component in its own folder
-
----
-
-## API Keys & Security
-
-### Keys Location: `src/keys.ignore.ts`
-
-```typescript
-export const groqApiKey = "gsk_...";
-export const openAiTTSApiKey = "sk-proj-...";
-```
-
-**Rules**:
-- ✅ Never commit `keys.ignore.ts` (in `.gitignore`)
-- ✅ Never log keys to console
-- ✅ Client-side keys only (no server secrets)
-- ✅ Use environment variables in production
 
 ---
 
@@ -271,20 +191,23 @@ export const openAiTTSApiKey = "sk-proj-...";
 ### Groq Story Generation
 
 **Prompt Location**: `src/constants/prompts.ts`
-- `storyGenerationPrompt` - Full system prompt
-- `conversationDynamics` - 20 narrative techniques
 
-**Prompt Structure**:
-1. **Mission**: Create gripping, emotionally charged conversation
-2. **Character Depth**: Distinct styles, motivations, flaws
-3. **Standardized Roles**: MUST use one of 20 roles (affects voice)
-4. **Conversation Dynamics**: 20 narrative techniques (e.g., "bold opening", "heated exchange")
-5. **Act Structure**: 
-   - Act 1 (4-5 lines): Hook + establish characters
-   - Act 2 (6-8 lines): Escalate conflict + reveal layers
-   - Act 3 (4-5 lines): Climax + transformation
-6. **Dialogue Craft**: Contractions, fragments, stage directions, natural cadence
-7. **Forbidden**: Therapist-speak, tidy resolutions, exposition
+**Architecture**:
+The prompt is dynamically assembled based on the selected `mode`:
+
+1.  **Framing**:
+    *   *Story*: "You are re-enacting..."
+    *   *Conversation*: "You are discussing..."
+2.  **Structure**:
+    *   *Story*: Cinematic Pacing (Hook -> Action -> Fallout)
+    *   *Conversation*: Discussion Arc (Act 1 -> Act 2 -> Act 3)
+3.  **Scenarios (Conversation Only)**:
+    *   Injects a random conversation pattern (e.g., "One person plays devil's advocate")
+4.  **Shared Instructions**:
+    *   Character Depth & Roles
+    *   Dialogue Craft (Realism, Interruptions)
+    *   Tone Annotations (`[angry]`, `[whispering]`)
+    *   JSON Output Format
 
 **Output**: JSON with `characters[]` and `dialogue[]`
 
@@ -292,115 +215,23 @@ export const openAiTTSApiKey = "sk-proj-...";
 
 **Voice Config Location**: `src/constants/theatreCharacters.ts`
 - `roleDescriptions` - Single source of truth for all roles
-- `maleVoices` - Array of male voice IDs
-- `femaleVoices` - Array of female voice IDs
-
-Each role has concise instructions (e.g., "warm, understanding, slower speech" for empathetic). These are dynamically passed to `gpt-4o-mini-tts` to shape voice characteristics.
+- `maleVoices` / `femaleVoices` - Voice ID arrays
 
 ---
 
 ## Common Patterns
 
 ### Adding a New Character Role
-
-1. Add to `roleDescriptions` in `src/constants/theatreCharacters.ts`
-2. That's it! `CharacterRole` type and `availableRoles` array are auto-derived
-3. Groq prompt is dynamically generated from the object
+1.  Add to `roleDescriptions` in `src/constants/theatreCharacters.ts`
+2.  That's it! Types and prompts update automatically.
 
 ### Adding a New Voice
+1.  Add to `maleVoices` or `femaleVoices` in `src/constants/theatreCharacters.ts`
 
-1. Verify voice is supported by OpenAI TTS
-2. Add to `maleVoices` or `femaleVoices` in `src/constants/theatreCharacters.ts`
-3. Test with `test-openai-voices.html` (standalone test page in root)
-
-### Debugging Voice Issues
-
-- Check console for `[Voice N] CharacterName (gender, role): voice=X, model=Y`
-- Verify base64 audio URI is generated (`data:audio/mp3;base64,...`)
-- Check browser autoplay policy (requires user interaction first)
-- Inspect OpenAI API response status (401 = permissions, 429 = rate limit)
-
-### Text Cleaning for TTS
-
-Located in `src/lib/textCleaner.ts`:
-- Removes markdown (`**bold**`, `_italic_`)
-- Removes emojis (🎭, ❤️, etc.)
-- Removes stage directions (`[pauses]`, `[laughs]`)
-- Preserves punctuation for natural pauses
-
----
-
-## Testing
-
-### Browser Testing
-- Always test with user interaction (click to play)
-- Test on Chrome, Firefox, Safari (autoplay policies differ)
-- Test with network throttling (for loading states)
-
-### Manual Test Scenarios
-1. Generate story with 3 characters (all unique voices)
-2. Generate story with 6 characters (some voice repetition expected)
-3. Generate story with all male/all female characters
-4. Test first audio cutoff fix (600ms delay)
-5. Test character highlighting during speech
-6. Test pause/resume/replay/download functionality
-7. Test direct `/theatre` navigation (should redirect to `/`)
-
----
-
-## Known Limitations
-
-1. **Voice Repetition**: After 3 males or 5 females, voices will repeat
-2. **Browser Autoplay**: First interaction required to unlock audio
-3. **Rate Limits**: OpenAI TTS has rate limits (429 errors possible)
-4. **Mobile**: Spotlight animation may be heavy on low-end devices
-5. **State Loss**: Refreshing `/theatre` loses story (navigated via state, not URL)
-
----
-
-## Development Workflow
-
-### Starting Dev Server
-```bash
-npm install
-npm run dev
-```
-
-### Building for Production
-```bash
-npm run build
-npm run preview  # Test production build
-```
-
-### Code Quality
-- Run linter before committing
-- Fix all TypeScript errors (no `@ts-ignore`)
-- Test in browser (not just CLI)
-- Check responsive design (desktop + mobile)
-
----
-
-## Troubleshooting
-
-### "401 Unauthorized" from OpenAI
-- API key missing or invalid permissions
-- Ensure key has "model.request" scope
-
-### "Audio cutoff at start"
-- First audio needs 600ms delay (`isFirstAudio` flag)
-- Check `playDialogue` in `usePersonaVoices.ts`
-
-### "Characters don't highlight when speaking"
-- `currentDialogueIndex` not updating
-- Check `setCurrentDialogueIndex` in `playDialogue`
-
-### "Redirected to home from /theatre"
-- `/theatre` requires `location.state.topic` from navigation
-- Direct URL access will redirect to `/`
-
-### "Downloaded audio only plays in one ear"
-- Fixed: `combineAudioBuffers` now handles mono/stereo correctly
-- Check `lib/audioUtils.ts` for stereo conversion logic
+### Debugging
+- **Voice Issues**: Check console for `[Voice N]...` logs.
+- **Prompt Issues**: Check `prompts.ts` - ensure shared vs specific logic is correct.
+- **Routing**: Ensure `mode` is passed in `navigate` state.
 
 ---
 
@@ -409,39 +240,11 @@ npm run preview  # Test production build
 | File | Purpose | Notes |
 |------|---------|-------|
 | `keys.ignore.ts` | API keys | Never commit |
-| `constants/prompts.ts` | AI prompts | Carefully tuned |
+| `constants/prompts.ts` | AI prompts | **CRITICAL**: Handles mode logic |
 | `constants/theatreCharacters.ts` | Role system | Single source of truth |
-| `hooks/usePerspectives.ts` | Story fetching | Handles Groq API |
-| `hooks/usePersonaVoices.ts` | Voice engine | Handles OpenAI TTS |
-| `lib/avatarConstants.ts` | Avatar pools | Gender-specific IDs |
-| `components/ChromaGrid/` | Visual engine | GSAP animations |
-
----
-
-## Quick Reference
-
-### Character Roles (20)
-empathetic, analytical, provocateur, emotional, calm, assertive, skeptical, optimistic, cynical, nurturing, intense, playful, serious, wise, rebellious, mediator, challenger, supporter, observer, wildcard
-
-### Male Voices (3)
-onyx, ash, echo
-
-### Female Voices (5)
-alloy, nova, shimmer, sage, coral
-
-### Key Hooks
-- `usePerspectives()` - Story generation (Groq)
-- `usePersonaVoices()` - Voice management (OpenAI)
-
-### Key Pages
-- `LandingPage` - Hero + input (route: `/`)
-- `TheatrePage` - Theatre mode (route: `/theatre`)
-
-### Key Components
-- `ChromaGrid` - Character grid with spotlight
-- `VolumeControl` - Audio volume slider
+| `hooks/usePerspectives.ts` | Story fetching | Handles Groq API & Mode |
+| `components/ModeSwitch/` | UI Toggle | "Cookie" switch implementation |
 
 ---
 
 **Last Updated**: November 2024
-**License**: [Your License]
