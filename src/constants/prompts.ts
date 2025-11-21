@@ -67,12 +67,13 @@ export function getRandomScenario(): string {
   return conversationScenarios[Math.floor(Math.random() * conversationScenarios.length)];
 }
 
-export function storyGenerationPrompt(): string {
-  return `You are a master screenwriter creating a gripping, emotionally charged conversation between 3-5 distinct characters.
-
-**USER'S SITUATION:** [will be inserted]
-
-**CRITICAL FRAMING:**
+/**
+ * Conversation Mode: Friends discussing what happened to [USER_NAME]
+ */
+/**
+ * Conversation Mode: Friends discussing what happened to [USER_NAME]
+ */
+const getConversationModeFraming = () => `**CRITICAL FRAMING:**
 The characters are discussing what [USER_NAME] told them about their situation - NOT experiencing it themselves.
 - The user input above is what [USER_NAME] said/experienced (when it says "I", that's [USER_NAME] speaking)
 - The characters are talking ABOUT what [USER_NAME] told them, not claiming it as their own experience
@@ -83,7 +84,60 @@ The characters are discussing what [USER_NAME] told them about their situation -
 - Use [USER_NAME] naturally but SPARINGLY - mostly use pronouns (him/her) instead of repeating the name constantly
 - Based on the name, infer the person's likely gender and use appropriate pronouns (him/her, he/she, his/hers) instead of they/them
 
-**BE CREATIVE:**
+**CONVERSATION PATTERN:**
+${getRandomScenario()}
+
+Use this as a loose guide for the conversation's dynamic. Adapt it naturally to fit the user's situation - don't force it.`;
+
+/**
+ * Story Mode: Re-enacting the situation as a dramatic scene
+ */
+const STORY_MODE_FRAMING = `**CRITICAL FRAMING:**
+You are creating a dramatic re-enactment inspired by what [USER_NAME] described. This is a STORY - bring a compelling scene to life!
+
+**ABSOLUTELY FORBIDDEN:**
+- Do NOT have characters discussing the situation as a past event or "news" they heard.
+- Do NOT have characters analyzing the situation from the outside.
+- This is NOT a therapy session or a gossip circle.
+
+**STORYTELLING APPROACH:**
+- **SHOW, DON'T TELL:** If the user says "I found out my coworker earns more", show the EXACT MOMENT of discovery. Show them looking at the payslip, or the tense confrontation with the boss, or the awkward silence with the coworker.
+- **IN MEDIA RES:** Start the scene right in the middle of the action. No "Hello, how are you?" pleasantries.
+- **IMMEDIATE CONFLICT:** Jump straight to the tension.
+- The characters ARE the people in the scene (e.g., the Boss, the Coworker, [USER_NAME]).
+
+**SCENE SELECTION:**
+- Choose the most dramatic, emotionally resonant moment implied by the input.
+- If the input is "I found out...", the scene IS the finding out.
+- If the input is "I had a fight...", the scene IS the fight.
+- If the input is "I'm worried about...", show the moment that caused the worry, or the confrontation it leads to.
+
+**[USER_NAME] INCLUSION:**
+- Include [USER_NAME] as a character ONLY if they're directly involved in the scene you're showing.
+- If they're just an observer or it's about others: focus on those central to the action.
+- Examples:
+  - "I saw two people fighting" → Show the fight, [USER_NAME] doesn't need to be present.
+  - "I had tea with grandma" → [USER_NAME] should be in the scene.
+  - "My friend got dumped" → Could show the breakup without [USER_NAME].
+- Use your judgment - prioritize dramatic impact over forcing [USER_NAME] into every scene.
+
+**NARRATIVE ELEMENTS:**
+- Include reactions, body language, and emotional beats in the dialogue.
+- Show the buildup, tension, and consequences as they unfold.
+- Let the scene breathe - moments of silence, hesitation, realization.
+- Create atmosphere through how characters speak and react.
+- Make the most emotionally powerful choice - surprise us with your creativity.
+
+**CHARACTER GUIDELINES:**
+- When [USER_NAME] is in the scene: use their name when others address them, first-person when they speak.
+- Based on the name, infer [USER_NAME]'s likely gender for consistency.
+- Focus on authentic reactions and emotions in the heat of the moment.
+- Create characters naturally based on who belongs in THIS specific scene.`;
+
+/**
+ * Base instructions shared by both modes (technical specs, dialogue craft, format)
+ */
+const BASE_INSTRUCTIONS = `**BE CREATIVE:**
 Don't fall into predictable patterns. Surprise with unexpected turns, unique character dynamics, and fresh perspectives. Avoid one-dimensional conversations where everyone just states opinions. Make it cinematic and memorable.
 
 **YOUR MISSION:**
@@ -98,17 +152,12 @@ Create characters with:
 - Varying levels of social awareness and emotional intelligence
 
 **IMPORTANT: STANDARDIZED ROLES**
-Each character MUST have a \"role\" field that uses ONE of these exact values (this affects their voice characteristics):
+Each character MUST have a "role" field that uses ONE of these exact values (this affects their voice characteristics):
 ${availableRoles
-  .map((role) => `- \"${role}\" - ${roleDescriptions[role]}`)
+  .map((role) => `- "${role}" - ${roleDescriptions[role]}`)
   .join("\n")}
 
 Choose roles that create interesting dynamics and contrast. Each character should embody their role in speech patterns and perspective.
-
-**CONVERSATION PATTERN:**
-${getRandomScenario()}
-
-Use this as a loose guide for the conversation's dynamic. Adapt it naturally to fit the user's situation - don't force it.
 
 **STRUCTURAL REQUIREMENTS:**
 
@@ -160,23 +209,18 @@ Examples:
 
 Tone guidelines:
 - Be specific: not just "sad" but "heartbroken" or "disappointed"
-- Combine emotions when layered: [angry, defensive] or [hopeful, nervous]
+- Combine emotions when layered: [hopeful, nervous] or [angry, defensive]
 - Match the character's emotional arc through the conversation
 - Vary tones even for the same character - people's emotions shift!
 
-Common tones: angry, sad, excited, scared, cynical, hopeful, desperate, defensive, playful, serious, bitter, warm, cold, intense, calm, breaking, raw, gentle, harsh, proud, ashamed, confident, insecure
+Common tones: excited, scared, cynical, hopeful, desperate, defensive, playful, serious, bitter, warm, cold, intense, calm, breaking, raw, gentle, harsh, proud, ashamed, confident, insecure, angry, sad, happy
 
 Each line must:
-- Either raise stakes, reveal character depth, or shift perspective
 - Sound like something a real person would actually say
 - Move the conversation forward (no wheel-spinning)
 
 **ABSOLUTELY FORBIDDEN:**
-- Therapist-speak or self-help clichés
-- Anyone saying "I hear you" or "valid point" 
-- Characters perfectly articulating complex feelings (people fumble!)
 - Tidy resolutions where everyone learns and grows
-- Exposition disguised as dialogue
 - All characters becoming best friends by the end
 - Safe, sanitized conflict
 
@@ -195,7 +239,7 @@ Output ONLY this JSON (no markdown, no explanations):
   "characters": [
     {
       "id": "lowercase-kebab-case",
-      "name": "Full Name (realistic, culturally appropriate)",
+      "name": "First name only (realistic, culturally appropriate)",
       "gender": "male OR female (choose based on the character)",
       "role": "MUST be ONE of the 20 standardized roles listed above (e.g., 'emotional', 'analytical', 'provocateur')",
       "image": "LEAVE EMPTY - will be auto-assigned",
@@ -213,4 +257,19 @@ Output ONLY this JSON (no markdown, no explanations):
 }
 
 Remember: This is theatre. Every word matters. Make it unforgettable.`;
+
+/**
+ * Main story generation prompt - combines mode-specific framing with base instructions
+ */
+export function storyGenerationPrompt(mode: 'conversation' | 'story' = 'conversation'): string {
+  const modeFraming = mode === 'conversation' ? getConversationModeFraming() : STORY_MODE_FRAMING;
+  
+  return `You are a master screenwriter creating a gripping, emotionally charged conversation between 3-5 distinct characters.
+
+**USER'S SITUATION:** [will be inserted]
+
+${modeFraming}
+
+${BASE_INSTRUCTIONS}
+`;
 }

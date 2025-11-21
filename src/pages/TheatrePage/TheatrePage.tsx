@@ -13,8 +13,9 @@ import "./TheatrePage.css";
 export function TheatrePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const topic = (location.state as { topic?: string; name?: string })?.topic || "";
-  const routerName = (location.state as { topic?: string; name?: string })?.name;
+  const topic = (location.state as { topic?: string; name?: string; mode?: string })?.topic || "";
+  const routerName = (location.state as { topic?: string; name?: string; mode?: string })?.name;
+  const mode = (location.state as { topic?: string; name?: string; mode?: string })?.mode || 'conversation';
   
   // Use name from router state, or fall back to localStorage, or undefined
   const userName = routerName || localStorage.getItem("userName") || undefined;
@@ -46,7 +47,7 @@ export function TheatrePage() {
       return;
     }
     unlockAudio();
-    fetchStory(topic, userName);
+    fetchStory(topic, userName, mode as 'conversation' | 'story');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, userName, navigate]); // Only depend on topic, userName, and navigate, not the functions
 

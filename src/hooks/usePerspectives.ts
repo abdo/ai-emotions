@@ -85,7 +85,11 @@ export function usePerspectives() {
 
   const isLoadingRef = useRef(false);
 
-  const fetchStory = useCallback(async (userInput: string, userName?: string) => {
+  const fetchStory = useCallback(async (
+    userInput: string, 
+    userName?: string,
+    mode: 'conversation' | 'story' = 'conversation'
+  ) => {
     if (!userInput.trim()) return;
 
     // Prevent duplicate calls
@@ -118,7 +122,7 @@ export function usePerspectives() {
       }
 
       // Build the prompt with userName if provided
-      let promptContent = storyGenerationPrompt().replace(
+      let promptContent = storyGenerationPrompt(mode).replace(
         "[will be inserted]",
         userInput.trim()
       );

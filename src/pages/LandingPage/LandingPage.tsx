@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ModeSwitch } from "../../components/ModeSwitch/ModeSwitch";
 import "./LandingPage.css";
 import theatreImage from "../../assets/theatre.webp";
 
@@ -14,6 +15,7 @@ const examplePrompts = [
 export function LandingPage() {
   const [input, setInput] = useState("");
   const [name, setName] = useState("");
+  const [isConversationMode, setIsConversationMode] = useState(false); // Story mode is default (right/checked)
   const navigate = useNavigate();
 
   // Load saved name from localStorage on mount
@@ -36,7 +38,8 @@ export function LandingPage() {
       navigate("/theatre", { 
         state: { 
           topic: text.trim(),
-          name: finalName || undefined 
+          name: finalName || undefined,
+          mode: isConversationMode ? 'conversation' : 'story'
         } 
       });
     }
@@ -123,8 +126,13 @@ export function LandingPage() {
               onClick={() => handleSubmit(input)}
               disabled={!input.trim()}
             >
-              Start the Show 👉
+              Start the Show 🎭
             </button>
+            
+            <ModeSwitch
+              isConversationMode={isConversationMode}
+              onToggle={setIsConversationMode}
+            />
           </div>
 
           <div className="examples-section">
