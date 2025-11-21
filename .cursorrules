@@ -2,249 +2,448 @@
 
 ## Project Overview
 
-**AI Show** is a React + TypeScript web application that creates cinematic, AI-generated conversations from user situations. It offers two distinct modes:
-1.  **Story Mode**: A cinematic re-enactment of the user's situation ("Show, Don't Tell").
-2.  **Conversation Mode**: A deep discussion/debate between friends about the situation.
+**AI Show** is a full-stack TypeScript application that creates cinematic, AI-generated conversations from user situations. It features:
 
-It uses:
-- **Groq AI** (`llama-3.3-70b-versatile`) for generating dramatic character dialogues
-- **OpenAI TTS** (`gpt-4o-mini-tts`) for realistic, persona-based voice generation
-- **React 18 + Vite + React Router** for modern SPA development
+1.  **Story Mode**: A cinematic re-enactment of the user's situation ("Show, Don't Tell")
+2.  **Conversation Mode**: A deep discussion/debate between friends about the situation
 
-The app generates 3-6 distinct characters with unique voices, personalities, and perspectives, then plays their conversation as an animated theatrical experience.
+### Architecture
+- **Frontend**: React 19 + TypeScript + Vite SPA
+- **Backend**: Firebase Cloud Functions (Node.js 24) - handles AI generation and voice synthesis
+- **AI Services**: Groq API (story generation) + OpenAI TTS API (voice synthesis)
+
+The backend generates 3-6 distinct characters with unique voices, personalities, and perspectives, then returns the dialogue and audio. The frontend plays the conversation as an animated theatrical experience.
 
 ---
 
 ## Tech Stack
 
-### Core
+### Frontend
 - **Build Tool**: Vite
 - **Language**: TypeScript (strict mode)
-- **UI Framework**: React 18 (functional components only)
-- **Routing**: React Router v6
+- **UI Framework**: React 19 (functional components only)
+- **Routing**: React Router v7
 - **Styling**: Plain CSS (co-located with components)
-- **Animation**: GSAP (for ChromaGrid spotlight effects)
+- **Animation**: GSAP (for ChromaGrid spotlight effects), OGL (WebGL)
 - **HTTP Client**: Axios
+- **Analytics**: PostHog (optional)
 
-### AI Services
-- **Text Generation**: Groq API (`llama-3.3-70b-versatile`)
-- **Voice Synthesis**: OpenAI TTS API (`gpt-4o-mini-tts`)
-
-### Key Libraries
-- `ogl` - WebGL graphics (for ChromaGrid)
-- `gsap` - Smooth animations
-- `react-router-dom` - Client-side routing
+### Backend
+- **Runtime**: Firebase Cloud Functions (Node.js 24)
+- **Language**: TypeScript (compiled to JavaScript)
+- **AI Services**: 
+  - Groq API (`llama-3.3-70b-versatile`) - story generation
+  - OpenAI TTS API (`gpt-4o-mini-tts`) - voice synthesis
+- **HTTP Client**: Axios
 
 ---
 
 ## Architecture
 
-### File Structure
+### Project Structure
 
 ```
-src/
-├── pages/                       # Route pages
-│   ├── LandingPage/
-│   │   ├── LandingPage.tsx      # Hero + input + mode switch (route: /)
-│   │   └── LandingPage.css
-│   └── TheatrePage/
-│       ├── TheatrePage.tsx      # Theatre mode (route: /theatre)
-│       └── TheatrePage.css
-├── components/                   # Reusable UI components
-│   ├── ChromaGrid/
-│   │   ├── ChromaGrid.tsx       # Interactive character grid
-│   │   └── ChromaGrid.css
-│   ├── ModeSwitch/
-│   │   ├── ModeSwitch.tsx       # Cookie-themed toggle (Story/Conversation)
-│   │   └── ModeSwitch.css
-│   └── VolumeControl/
-│       ├── VolumeControl.tsx    # Audio volume slider
-│       └── VolumeControl.css
-├── ui/                          # UI primitives
-│   └── icons/                   # SVG icon components
-├── hooks/                       # Custom React hooks
-│   ├── usePerspectives.ts       # Groq AI story generation (handles modes)
-│   └── usePersonaVoices.ts      # OpenAI TTS voice management
-├── constants/                   # Static configuration
-│   ├── theatreCharacters.ts     # Character roles & voice config
-│   ├── prompts.ts              # AI prompts (Shared + Mode-Specific)
-│   └── demoData.ts             # Fallback/mock story data
-├── lib/                        # Utility functions
-│   ├── avatarConstants.ts      # Gender-specific avatar pools
-│   ├── textCleaner.ts         # Text sanitization for TTS
-│   └── audioUtils.ts          # Audio processing utilities
-├── assets/
-│   └── theatre.webp           # Landing page background
-├── keys.ignore.ts             # API keys (NEVER COMMIT!)
-├── App.tsx                    # Router setup
-└── main.tsx                   # Entry point
+ai-emotions/
+├── src/                                    # FRONTEND SOURCE
+│   ├── pages/                              # Route pages
+│   │   ├── LandingPage/
+│   │   │   ├── LandingPage.tsx            # Hero + input + mode switch (route: /)
+│   │   │   └── LandingPage.css
+│   │   └── TheatrePage/
+│   │       ├── TheatrePage.tsx            # Theatre mode (route: /theatre)
+│   │       └── TheatrePage.css
+│   ├── components/                         # Reusable UI components
+│   │   ├── ChromaGrid/                    # Interactive character grid
+│   │   ├── ModeSwitch/                    # Cookie-themed toggle
+│   │   ├── VolumeControl/                 # Audio volume slider
+│   │   └── PostHogPageView/               # Analytics page tracking
+│   ├── ui/icons/                           # SVG icon components
+│   ├── hooks/
+│   │   └── useShow.ts                     # Main hook - calls API, manages audio playback
+│   ├── services/
+│   │   └── api.ts                         # API client for Firebase backend
+│   ├── constants/                          # Frontend constants only
+│   ├── assets/                            # Static files
+│   ├── keys.ignore.ts                     # Frontend API keys (PostHog, etc.)
+│   ├── App.tsx                            # Router setup
+│   └── main.tsx                           # Entry point
+│
+├── backend/                               # FIREBASE BACKEND
+│   ├── firebase.json                      # Firebase configuration
+│   └── functions/
+│       ├── src/
+│       │   ├── index.ts                  # Firebase function exports (getShow)
+│       │   ├── controllers/
+│       │   │   └── showController.ts     # Request handler (CORS, validation, orchestration)
+│       │   ├── services/
+│       │   │   ├── storyService.ts       # Groq story generation + character enrichment
+│       │   │   └── voiceService.ts       # OpenAI TTS voice synthesis
+│       │   ├── constants/
+│       │   │   ├── prompts.ts            # AI prompts (mode-specific)
+│       │   │   ├── theatreCharacters.ts  # Role system, voice pools
+│       │   │   └── avatarConstants.ts    # Pravatar image ID pools
+│       │   ├── types/
+│       │   │   └── index.ts              # Shared types (Character, StoryData, etc.)
+│       │   ├── utils/
+│       │   │   ├── AppError.ts           # Custom error class
+│       │   │   └── textCleaner.ts        # Text sanitization for TTS
+│       │   └── keys.ignore.ts            # Backend API keys (Groq, OpenAI)
+│       ├── package.json                  # Backend dependencies
+│       └── tsconfig.json                 # Backend TypeScript config
+│
+├── package.json                          # Frontend dependencies
+└── README.md                             # User-facing documentation
 ```
 
-### Routing
+---
+
+## Data Flow
+
+### Request/Response Flow
 
 ```
-/ (LandingPage)
-  → User enters situation + optional name
-  → User selects Mode (Story vs Conversation)
-  → Navigates to /theatre with state: { topic, mode, name }
+1. Frontend (LandingPage)
+   └─> User enters situation + mode
+   └─> Navigate to /theatre with state: { topic, mode, name }
 
-/theatre (TheatrePage)
-  → Fetches story from Groq using mode-specific prompt
-  → Generates voices from OpenAI
-  → Plays conversation
-  → Redirects to / if no topic
+2. Frontend (TheatrePage - useShow hook)
+   └─> POST to Firebase Function: { userInput, userName, mode }
+
+3. Backend (Firebase Function: getShow)
+   ├─> ShowController validates request
+   ├─> StoryService.generateStory()
+   │   ├─> Calls Groq API with mode-specific prompt
+   │   ├─> Receives JSON: { characters, dialogue }
+   │   └─> Enriches characters with avatars, voices, colors
+   ├─> VoiceService.generateVoices()
+   │   ├─> Cleans text (removes markdown, emojis, stage directions)
+   │   ├─> Calls OpenAI TTS in parallel for each dialogue line
+   │   └─> Returns audioMap: { [index]: "data:audio/mp3;base64..." }
+   └─> Returns: { story, audioMap }
+
+4. Frontend (TheatrePage)
+   └─> Plays audio sequentially with character highlighting
 ```
+
+### API Endpoint
+
+**Local Development**: `http://localhost:5000/ai-show-afb45/us-central1/getShow`  
+**Production**: Set in `src/services/api.ts` after deployment
 
 ---
 
 ## Key Concepts
 
-### 1. Story Generation Flow
+### 1. Backend: Story Generation (StoryService)
 
-1.  User enters a situation on `/` (LandingPage)
-2.  Navigate to `/theatre` with `{ state: { topic, mode, name } }`
-3.  `usePerspectives` calls `storyGenerationPrompt(mode)` in `constants/prompts.ts`
-4.  **Prompt Construction**:
-    *   **Shared Instructions**: Character depth, roles, dialogue craft, JSON format.
-    *   **Mode-Specific Framing**:
-        *   *Story*: "Re-enact this scene", "Show don't tell", "In Media Res".
-        *   *Conversation*: "Discuss this topic", "Debate", "Random Scenario".
-    *   **Structure**:
-        *   *Story*: Hook -> Action -> Fallout.
-        *   *Conversation*: Act 1 -> Act 2 -> Act 3.
-5.  AI returns JSON with characters and dialogue.
+**Location**: `backend/functions/src/services/storyService.ts`
 
-### 2. Modes
+**Flow**:
+1. Receives `userInput`, `userName`, `mode` from controller
+2. Selects prompt template from `constants/prompts.ts` based on mode
+3. Calls Groq API (`llama-3.3-70b-versatile`) with:
+   - Temperature: 0.9
+   - Top P: 0.95
+   - Max Tokens: 4000
+   - Response Format: JSON
+4. Parses response to `StoryData` (characters + dialogue)
+5. Enriches each character:
+   - Assigns random **avatar** from gender-specific pool (pravatar.cc)
+   - Assigns unique **voice** from unused voices
+   - Generates **color scheme** (border + gradient)
+6. Returns enriched `StoryData`
+
+**Character Enrichment**:
+- Avatar IDs from `constants/avatarConstants.ts` (separated by gender)
+- Voice selection from `constants/theatreCharacters.ts` (tracks used voices to avoid repetition)
+- Color generation: HSL-based random vibrant colors
+
+---
+
+### 2. Backend: Voice Generation (VoiceService)
+
+**Location**: `backend/functions/src/services/voiceService.ts`
+
+**Flow**:
+1. Receives `StoryData` from controller
+2. For each dialogue line:
+   - Finds character by ID
+   - Cleans text via `textCleaner.ts`:
+     - Removes markdown formatting (`**bold**`, `*italic*`)
+     - Removes emojis
+     - Removes stage directions (`[angry]`, `(whispers)`)
+     - Converts ellipses to proper pauses
+   - Maps character role to voice instructions
+   - Calls OpenAI TTS with:
+     - Model: `gpt-4o-mini-tts`
+     - Voice: Character's assigned voice ID
+     - Instructions: Role-based tone/style
+   - Converts audio to base64 data URI
+3. Returns `audioMap`: `{ 0: "data:audio/mp3;base64...", 1: "...", ... }`
+
+**Text Cleaning Rules** (IMPORTANT):
+- Must preserve natural pauses and emphasis
+- Ellipses (`...`) → converted to proper TTS pauses
+- Remove ALL markdown and annotations
+- Keep punctuation for natural speech rhythm
+
+---
+
+### 3. Frontend: Show Playback (useShow hook)
+
+**Location**: `src/hooks/useShow.ts`
+
+**Flow**:
+1. Calls backend API on component mount
+2. Receives `{ story, audioMap }`
+3. Pre-creates Audio objects from base64 URIs
+4. On user click ("Start the show"):
+   - Plays dialogue sequentially
+   - 600ms delay before first line (prevents cutoff)
+   - 100ms gap between subsequent lines
+   - Syncs character highlighting with audio
+5. Volume control applies to all audio elements
+
+---
+
+### 4. Two Modes: Story vs Conversation
 
 **Story Mode (Default)**
-*   **Goal**: Cinematic re-enactment of the event.
-*   **Prompting**: Enforces "Show, Don't Tell". Starts *in media res* (in the middle of action).
-*   **Structure**: Hook -> Action -> Fallout.
-*   **User Inclusion**: Only included if they are a direct participant in the scene.
+- **Goal**: Cinematic re-enactment of the event
+- **Prompting**: "Show, Don't Tell", starts *in media res* (middle of action)
+- **Structure**: Hook → Action → Fallout
+- **User Inclusion**: Only if they're a direct participant in the scene
 
 **Conversation Mode**
-*   **Goal**: Friends discussing/debating the event.
-*   **Prompting**: Discussing *about* the user's situation.
-*   **Structure**: Act 1 (Opening) -> Act 2 (Conflict) -> Act 3 (Climax).
-*   **Dynamics**: Injects a random "Conversation Scenario" (e.g., "Devil's Advocate", "Unexpected Agreement") to keep discussions fresh.
+- **Goal**: Friends discussing/debating the event
+- **Prompting**: Discussing *about* the user's situation
+- **Structure**: Act 1 (Opening) → Act 2 (Conflict) → Act 3 (Climax)
+- **Dynamics**: Random "Conversation Scenario" injected (e.g., "Devil's Advocate")
 
-### 3. Voice System
+**Prompt Location**: `backend/functions/src/constants/prompts.ts`
 
-**20 Standardized Roles** (defined in `constants/theatreCharacters.ts`):
-- Single source of truth: `roleDescriptions` object
-- Roles: empathetic, analytical, provocateur, emotional, calm, assertive, skeptical, optimistic, cynical, nurturing, intense, playful, serious, wise, rebellious, mediator, challenger, supporter, observer, wildcard
+---
 
-Each role maps to:
-- **Instructions** for OpenAI TTS (e.g., "raw, expressive, passionate")
-- **Voice pool** by gender (Onyx, Ash, Echo, Alloy, Nova, Shimmer, Sage, Coral)
+### 5. Character Role System
 
-**Voice Selection Logic**:
-- Tracks `usedVoices` Set per story generation
-- Picks from unused voices first (to avoid repetition)
-- Falls back to random if all voices exhausted
+**Location**: `backend/functions/src/constants/theatreCharacters.ts`
 
-### 4. Text-to-Speech Pipeline
+**20 Standardized Roles**:
+- `empathetic`, `analytical`, `provocateur`, `emotional`, `calm`, `assertive`, `skeptical`, `optimistic`, `cynical`, `nurturing`, `intense`, `playful`, `serious`, `wise`, `rebellious`, `mediator`, `challenger`, `supporter`, `observer`, `wildcard`
 
-1.  User clicks "Start the show"
-2.  Browser requests user interaction (autoplay policy bypass)
-3.  `usePersonaVoices` generates all voices in parallel:
-    - Cleans text via `lib/textCleaner.ts` (removes markdown, emojis, stage directions)
-    - Calls OpenAI TTS with role-based instructions
-    - Converts response to base64 `data:audio/mp3` URI
-4.  Plays dialogue sequentially with 100ms gap between lines
-5.  First audio has 600ms delay to prevent cutoff
-6.  Highlights speaking character in ChromaGrid
+**Role Configuration** (single source of truth: `roleDescriptions`):
+```typescript
+export const roleDescriptions = {
+  empathetic: {
+    description: "Deeply understanding, emotionally attuned...",
+    voiceInstructions: "warm, gentle, soothing tone...",
+  },
+  // ... 19 more
+};
+```
+
+**Voice Pools**:
+- **Male**: Onyx, Echo, Fable, Ash, Ballad
+- **Female**: Alloy, Nova, Shimmer, Sage, Coral
+
+**Voice Selection Logic** (anti-repetition):
+1. Track `usedVoices` Set for current story
+2. Filter out used voices
+3. Pick randomly from unused voices first
+4. If all exhausted, pick from full pool
 
 ---
 
 ## Coding Standards
 
-### TypeScript
+### General TypeScript
 
 - **No `any`** - use `unknown` or proper types
-- **Explicit prop types** for all components
-- **Named exports** preferred
-- **Derive types from data** when possible (single source of truth)
+- **Explicit types** for function returns and parameters
+- **Named exports** preferred over default exports
+- **Single source of truth** for types (derive when possible)
 
-### React Patterns
+### Frontend (React)
 
-- **Functional components only**
+- **Functional components only** (no class components)
 - **Hooks**: `useState`, `useEffect`, `useCallback`, `useMemo`, `useRef`
-- **React Router** for navigation (use `navigate()`, `useLocation()`)
+- **React Router v7** for navigation (`useNavigate()`, `useLocation()`)
+- **State Management**: React hooks + Router state (no Redux/Zustand)
+- **Styling**: Plain CSS files co-located with components
 
-### State Management
+### Backend (Firebase Functions)
 
-- **React hooks** for local state
-- **React Router state** for page-to-page data passing (topic, mode, name)
+- **Controllers**: Handle HTTP concerns (CORS, validation, error formatting)
+- **Services**: Business logic (AI calls, data transformation)
+- **Utils**: Shared helpers (AppError, textCleaner)
+- **Types**: Shared interfaces between frontend/backend
+- **Error Handling**: Use `AppError` class with statusCode + errorCode
+- **Logging**: Use `firebase-functions/logger` (not `console.log`)
 
-### Styling
+### File Organization
 
-- **Plain CSS files** co-located with components
-- **Component-scoped classes**
-- **CSS custom properties** for theming
-- **Responsive**: use `clamp()`, `vw`, media queries
-
----
-
-## AI Configuration
-
-### Groq Story Generation
-
-**Prompt Location**: `src/constants/prompts.ts`
-
-**Architecture**:
-The prompt is dynamically assembled based on the selected `mode`:
-
-1.  **Framing**:
-    *   *Story*: "You are re-enacting..."
-    *   *Conversation*: "You are discussing..."
-2.  **Structure**:
-    *   *Story*: Cinematic Pacing (Hook -> Action -> Fallout)
-    *   *Conversation*: Discussion Arc (Act 1 -> Act 2 -> Act 3)
-3.  **Scenarios (Conversation Only)**:
-    *   Injects a random conversation pattern (e.g., "One person plays devil's advocate")
-4.  **Shared Instructions**:
-    *   Character Depth & Roles
-    *   Dialogue Craft (Realism, Interruptions)
-    *   Tone Annotations (`[angry]`, `[whispering]`)
-    *   JSON Output Format
-
-**Output**: JSON with `characters[]` and `dialogue[]`
-
-### OpenAI TTS Configuration
-
-**Voice Config Location**: `src/constants/theatreCharacters.ts`
-- `roleDescriptions` - Single source of truth for all roles
-- `maleVoices` / `femaleVoices` - Voice ID arrays
+- **Co-locate** CSS with components (e.g., `Button.tsx` + `Button.css`)
+- **Group by feature** not by type (exceptions: pages, components, hooks)
+- **Keep constants separate** from implementation
+- **Never commit** `keys.ignore.ts` files
 
 ---
 
-## Common Patterns
+## Common Development Tasks
 
 ### Adding a New Character Role
-1.  Add to `roleDescriptions` in `src/constants/theatreCharacters.ts`
-2.  That's it! Types and prompts update automatically.
+
+**Backend**:
+1. Add to `roleDescriptions` in `backend/functions/src/constants/theatreCharacters.ts`
+2. Types update automatically (TypeScript unions)
+
+**Frontend**:
+- No changes needed (backend enriches characters)
+
+---
 
 ### Adding a New Voice
-1.  Add to `maleVoices` or `femaleVoices` in `src/constants/theatreCharacters.ts`
 
-### Debugging
-- **Voice Issues**: Check console for `[Voice N]...` logs.
-- **Prompt Issues**: Check `prompts.ts` - ensure shared vs specific logic is correct.
-- **Routing**: Ensure `mode` is passed in `navigate` state.
+**Backend**:
+1. Add voice ID to `maleVoices` or `femaleVoices` in `backend/functions/src/constants/theatreCharacters.ts`
+2. Ensure it's a valid OpenAI TTS voice
 
 ---
 
-## Important Files
+### Modifying AI Prompts
 
-| File | Purpose | Notes |
-|------|---------|-------|
-| `keys.ignore.ts` | API keys | Never commit |
-| `constants/prompts.ts` | AI prompts | **CRITICAL**: Handles mode logic |
-| `constants/theatreCharacters.ts` | Role system | Single source of truth |
-| `hooks/usePerspectives.ts` | Story fetching | Handles Groq API & Mode |
-| `components/ModeSwitch/` | UI Toggle | "Cookie" switch implementation |
+**Backend**:
+1. Edit `backend/functions/src/constants/prompts.ts`
+2. Modify `storyGenerationPrompt(mode)` function
+3. Keep shared instructions vs mode-specific logic clear
+4. Test both Story and Conversation modes
 
 ---
 
-**Last Updated**: November 2024
+### Updating Text Cleaning Rules
+
+**Backend**:
+1. Edit `backend/functions/src/utils/textCleaner.ts`
+2. Add regex patterns or replacement rules
+3. Test with various dialogue edge cases
+
+---
+
+### Frontend: Changing API Endpoint
+
+**Frontend**:
+1. Edit `src/services/api.ts`
+2. Update `API_URL` constant
+3. Ensure CORS is configured on backend
+
+---
+
+## Running the App
+
+### Development (2 Terminals)
+
+**Terminal 1: Backend**
+```bash
+cd backend/functions
+npm run serve        # Compiles TS + starts Firebase emulator on :5000
+```
+
+**Terminal 2: Frontend**
+```bash
+npm run dev          # Starts Vite dev server on :5173
+```
+
+### Backend Commands
+```bash
+npm run serve        # Build + start emulator
+npm run build        # Compile TypeScript only
+npm run build:watch  # Watch mode
+npm run deploy       # Deploy to Firebase
+```
+
+### Frontend Commands
+```bash
+npm run dev          # Dev server
+npm run build        # Production build
+npm run preview      # Preview prod build
+```
+
+---
+
+## Configuration Files
+
+### Frontend Keys: `src/keys.ignore.ts` (git-ignored)
+```typescript
+const posthogApiKey = "phc_...";      // Optional
+const unsplashApiKey = "...";          // Optional
+export { posthogApiKey, unsplashApiKey };
+```
+
+### Backend Keys: `backend/functions/src/keys.ignore.ts` (git-ignored)
+```typescript
+export const groqApiKey = "gsk_...";           // REQUIRED
+export const openAiTTSApiKey = "sk-proj-...";  // REQUIRED
+```
+
+---
+
+## Important Files Reference
+
+| File | Purpose | Critical? |
+|------|---------|-----------|
+| **Backend** |
+| `backend/functions/src/index.ts` | Firebase function exports | Yes |
+| `backend/functions/src/controllers/showController.ts` | API orchestration + CORS | Yes |
+| `backend/functions/src/services/storyService.ts` | Groq story generation | Yes |
+| `backend/functions/src/services/voiceService.ts` | OpenAI TTS + text cleaning | Yes |
+| `backend/functions/src/constants/prompts.ts` | AI prompt templates | **CRITICAL** |
+| `backend/functions/src/constants/theatreCharacters.ts` | Role system + voice pools | Yes |
+| `backend/functions/src/utils/textCleaner.ts` | TTS text sanitization | Yes |
+| `backend/functions/src/keys.ignore.ts` | API keys (NEVER COMMIT) | **CRITICAL** |
+| **Frontend** |
+| `src/hooks/useShow.ts` | API call + audio management | Yes |
+| `src/services/api.ts` | HTTP client + error handling | Yes |
+| `src/keys.ignore.ts` | Analytics keys (NEVER COMMIT) | Optional |
+| `src/components/ChromaGrid/` | Character grid animation | Yes |
+
+---
+
+## Debugging Tips
+
+### Backend Issues
+
+- **"Cannot find module '../keys.ignore'"**: Create `backend/functions/src/keys.ignore.ts` with required keys
+- **Compilation errors**: Ensure Node.js v24+ and run `npm install` in `backend/functions/`
+- **API timeout**: Increase `timeoutSeconds` in `index.ts` function config
+- **CORS errors**: Check `showController.ts` CORS headers
+
+### Frontend Issues
+
+- **Can't connect to backend**: Verify backend is running on `:5000` and `api.ts` URL is correct
+- **Audio not playing**: Check browser console for base64 decoding errors
+- **Voice quality issues**: Review `textCleaner.ts` - might be removing too much
+
+### AI Generation Issues
+
+- **Poor dialogue**: Adjust prompts in `backend/functions/src/constants/prompts.ts`
+- **Repetitive voices**: Verify voice selection logic in `storyService.ts`
+- **Invalid JSON response**: Check Groq API logs, ensure prompt specifies JSON format
+
+---
+
+## Deployment
+
+### Backend (Firebase)
+```bash
+cd backend
+firebase login
+firebase deploy --only functions
+```
+Update `src/services/api.ts` with deployed URL.
+
+### Frontend
+Deploy to Vercel/Netlify/Firebase Hosting (static build).
+
+---
+
+**Last Updated**: November 2024 (v2.0 - Firebase Backend Migration)
