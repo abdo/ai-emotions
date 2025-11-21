@@ -43,8 +43,8 @@ export const ChromaGrid = ({
 }: ChromaGridProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
-  const setX = useRef<((value: number) => void) | null>(null);
-  const setY = useRef<((value: number) => void) | null>(null);
+  const setX = useRef<((value: number) => void) | Function | null>(null);
+  const setY = useRef<((value: number) => void) | Function | null>(null);
   const pos = useRef({ x: 0, y: 0 });
 
   const data = items || [];
@@ -58,8 +58,12 @@ export const ChromaGrid = ({
     const { width, height } = el.getBoundingClientRect();
     pos.current = { x: width / 2, y: height / 2 };
 
-    setX.current(pos.current.x);
-    setY.current(pos.current.y);
+    if (setX.current && typeof setX.current === 'function') {
+      setX.current(pos.current.x);
+    }
+    if (setY.current && typeof setY.current === 'function') {
+      setY.current(pos.current.y);
+    }
   }, []);
 
   const moveTo = (x: number, y: number) => {
@@ -69,8 +73,12 @@ export const ChromaGrid = ({
       duration: damping,
       ease,
       onUpdate: () => {
-        setX.current?.(pos.current.x);
-        setY.current?.(pos.current.y);
+        if (setX.current && typeof setX.current === 'function') {
+          setX.current(pos.current.x);
+        }
+        if (setY.current && typeof setY.current === 'function') {
+          setY.current(pos.current.y);
+        }
       },
       overwrite: true,
     });
