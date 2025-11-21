@@ -111,9 +111,6 @@ export function TheatrePage() {
     if (currentDialogueIndex === -1 || !story) return null;
     const characterId =
       story.dialogue[currentDialogueIndex]?.characterId || null;
-    console.log(
-      `[Highlight] Index: ${currentDialogueIndex}, CharacterId: ${characterId}`
-    );
     return characterId;
   }, [currentDialogueIndex, story]);
 

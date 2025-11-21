@@ -83,7 +83,6 @@ export function usePersonaVoices() {
       if (isMock) {
         const cachedVoices = localStorage.getItem("mock_voices");
         if (cachedVoices) {
-          console.log("Using cached mock voices");
           try {
             const parsedVoices = JSON.parse(cachedVoices) as AudioMap;
             // Add small artificial delay
@@ -127,14 +126,6 @@ export function usePersonaVoices() {
                 `[Voice ${index}] ${character.name} is missing voiceId!`
               );
               return undefined;
-            }
-
-            console.log(
-              `[Voice ${index}] ${character.name} (${character.gender}, ${characterRole}): voice=${voiceId}, model=gpt-4o-mini-tts`
-            );
-            console.log(`  Base: ${roleConfig.instructions}`);
-            if (tone) {
-              console.log(`  Tone: ${tone}`);
             }
 
             const response = await fetch(
@@ -240,9 +231,6 @@ export function usePersonaVoices() {
         const audioElement = new Audio(audio.audioSrc);
         audioElement.volume = volume / 100;
         currentAudioRef.current = audioElement;
-        console.log(
-          `[Playback] Index: ${index}, CharacterId: ${audio.characterId}`
-        );
         setCurrentDialogueIndex(index);
 
         audioElement.onended = () => {
@@ -429,8 +417,6 @@ export function usePersonaVoices() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      console.log("Conversation downloaded successfully");
     } catch (error) {
       console.error("Failed to download conversation", error);
     }

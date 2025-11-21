@@ -94,7 +94,6 @@ export function usePerspectives() {
 
     // Prevent duplicate calls
     if (isLoadingRef.current) {
-      console.log("Already loading, skipping duplicate fetch");
       return;
     }
 
@@ -111,7 +110,6 @@ export function usePerspectives() {
       if (isMock) {
         const cachedStory = localStorage.getItem("mock_story");
         if (cachedStory) {
-          console.log("Using cached mock story");
           const story = JSON.parse(cachedStory) as StoryData;
           // Add small artificial delay to simulate loading
           await new Promise((resolve) => setTimeout(resolve, 1000));
