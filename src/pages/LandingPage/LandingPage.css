@@ -396,4 +396,8 @@
   .examples-grid {
     grid-template-columns: 1fr;
   }
+
+  .story-input {
+    min-height: 215px;
+  }
 }

@@ -1,0 +1,125 @@
+/* Script Overlay */
+.script-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.script-overlay-content {
+  background: linear-gradient(135deg, #d4af37, #f4e4c1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  opacity: 0.75;
+}
+
+.script-overlay-header {
+  padding: 1.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.script-overlay-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #2c2c2c;
+  font-weight: 700;
+}
+
+.close-overlay-btn {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #2c2c2c;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  line-height: 1;
+  padding: 0;
+}
+
+.close-overlay-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.script-overlay-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  color: #2c2c2c;
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.script-overlay-body::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+.script-scenario {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.scenario-label {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.scenario-value {
+  margin: 0;
+  font-size: 1.1rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: #2c2c2c;
+}
+
+.script-dialogue {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dialogue-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.character-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dialogue-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #2c2c2c;
+  padding-left: 1rem;
+}

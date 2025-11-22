@@ -8,6 +8,7 @@ import { ReplayIcon } from "../../ui/icons/ReplayIcon";
 import { PauseIcon } from "../../ui/icons/PauseIcon";
 import { PlayIcon } from "../../ui/icons/PlayIcon";
 import { ScrollTextIcon } from "../../ui/icons/ScrollTextIcon";
+import { ScriptOverlay } from "../../components/ScriptOverlay/ScriptOverlay";
 import { useShow } from "../../hooks/useShow";
 import { useAudioPlayback } from "../../hooks/useAudioPlayback";
 import { useDynamicScale } from "../../hooks/useDynamicScale";
@@ -22,6 +23,11 @@ const LOADING_MESSAGES = [
   "Adjusting camera angles...",
   "Doing rehearsals...",
   "Applying makeup...",
+  "Positioning microphones...",
+  "Preparing the stage...",
+  "Reviewing the script...",
+  "Preparing costumes...",
+  "Warming up the actors...",
 ];
 
 export function TheatrePage() {
@@ -54,6 +60,7 @@ export function TheatrePage() {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < BREAKPOINTS.TABLET);
+  const [isScriptOverlayOpen, setIsScriptOverlayOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -134,6 +141,10 @@ export function TheatrePage() {
     navigate("/");
   };
 
+  const toggleScriptOverlay = () => {
+    setIsScriptOverlayOpen(!isScriptOverlayOpen);
+  };
+
   const downloadScript = () => {
     if (!story) return;
 
@@ -155,6 +166,26 @@ export function TheatrePage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleScriptClick = () => {
+    if (isMobileView) {
+      toggleScriptOverlay();
+    } else {
+      downloadScript();
+    }
+  };
+
+  // Generate script content for overlay
+  const scriptLines = useMemo(() => {
+    if (!story) return [];
+    return story.dialogue.map((line) => {
+      const character = story.characters.find((c) => c.id === line.characterId);
+      return {
+        characterName: character?.name || line.characterId,
+        text: line.text
+      };
+    });
+  }, [story]);
+
   const allVoicesReady = useMemo(() => {
     return !isLoading && story !== null;
   }, [isLoading, story]);
@@ -168,12 +199,12 @@ export function TheatrePage() {
   }, [currentDialogueIndex, story]);
 
   // Truncate topic to ~10 words for display
-  const truncatedTopic = useMemo(() => {
+  const { displayText: truncatedTopic, isTruncated } = useMemo(() => {
     const words = topic.split(' ');
     if (words.length <= 10) {
-      return topic;
+      return { displayText: topic, isTruncated: false };
     }
-    return words.slice(0, 10).join(' ') + '...';
+    return { displayText: words.slice(0, 10).join(' ') + '...', isTruncated: true };
   }, [topic]);
 
   return (
@@ -196,11 +227,19 @@ export function TheatrePage() {
           <button className="icon-btn" onClick={downloadConversation} aria-label="Download Audio">
             <DownloadIcon />
           </button>
-          <button className="icon-btn" onClick={downloadScript} aria-label="Download Script">
+          <button className="icon-btn" onClick={handleScriptClick} aria-label="View Script">
             <ScrollTextIcon />
           </button>
         </div>
       </div>
+
+      {/* Script Overlay for Mobile */}
+      <ScriptOverlay
+        isOpen={isScriptOverlayOpen && isMobileView}
+        onClose={toggleScriptOverlay}
+        scenario={topic}
+        scriptLines={scriptLines}
+      />
 
       {conversationStarted && (
         <>
@@ -221,7 +260,7 @@ export function TheatrePage() {
       )}
 
       <div className="theatre-header">
-        <p className="scenario-text" title={topic}>"{truncatedTopic}"</p>
+        <p className="scenario-text" {...(isTruncated ? { title: topic } : {})}>"{truncatedTopic}"</p>
         
         <div className={`start-controls ${conversationStarted ? "hidden" : ""}`}>
           <div className="status-line">
@@ -285,7 +324,7 @@ export function TheatrePage() {
             </button>
             <button
               className="side-action-btn download-script-btn"
-              onClick={downloadScript}
+              onClick={handleScriptClick}
               title="Download Script"
             >
               <ScrollTextIcon />
