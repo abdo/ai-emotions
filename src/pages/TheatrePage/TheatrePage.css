@@ -121,7 +121,7 @@
 
 .theatre-header {
   max-width: 1000px;
-  margin: 0 auto 3rem;
+  margin: 0 auto;
   margin-top: 4rem;
   text-align: center;
   position: relative;
@@ -131,7 +131,7 @@
 .scenario-text {
   font-size: 1.35rem;
   color: #ccc;
-  margin-bottom: 1rem;
+  margin: 0 1rem 1rem;
   line-height: 1.5;
   font-style: italic;
 }
@@ -383,7 +383,7 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: 1rem;
+  padding: 1rem 2rem;
   z-index: 100;
   justify-content: space-between;
   align-items: center;
@@ -478,7 +478,7 @@
   }
 
   .theatre-page {
-    padding: 1rem;
+    padding: 1rem 0;
   }
 }
 
