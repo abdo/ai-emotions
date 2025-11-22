@@ -9,6 +9,7 @@ import { PlayIcon } from "../../ui/icons/PlayIcon";
 import { ScrollTextIcon } from "../../ui/icons/ScrollTextIcon";
 import { useShow } from "../../hooks/useShow";
 import { useAudioPlayback } from "../../hooks/useAudioPlayback";
+import { useDynamicScale } from "../../hooks/useDynamicScale";
 import "./TheatrePage.css";
 
 // Loading messages - defined outside component to avoid recreation
@@ -50,6 +51,9 @@ export function TheatrePage() {
   const [conversationStarted, setConversationStarted] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Dynamic scaling for large screens
+  const scaleStyle = useDynamicScale(1600);
 
   // Redirect to home if no topic provided, fetch story once on mount
   useEffect(() => {
@@ -153,7 +157,7 @@ export function TheatrePage() {
   }, [currentDialogueIndex, story]);
 
   return (
-    <div className="theatre-page">
+    <div className="theatre-page" style={scaleStyle}>
       <button
         className="back-arrow-btn"
         onClick={handleBack}
