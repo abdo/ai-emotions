@@ -51,8 +51,8 @@ export class StoryService {
     const usedVoices = new Set<string>();
 
     return characters.map((char, index) => {
-      // Ensure gender is set (fallback to alternating if missing)
-      const gender = char.gender || (index % 2 === 0 ? "male" : "female");
+      // Ensure gender is set (fallback to alternating if missing) and normalize
+      const gender = (char.gender || (index % 2 === 0 ? "male" : "female")).toLowerCase() as "male" | "female";
 
       // Assign Image
       const imageId = this.getRandomAvatarId(gender, usedAvatarIds);
