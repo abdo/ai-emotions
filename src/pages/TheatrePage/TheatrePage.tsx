@@ -167,6 +167,15 @@ export function TheatrePage() {
     return characterId;
   }, [currentDialogueIndex, story]);
 
+  // Truncate topic to ~10 words for display
+  const truncatedTopic = useMemo(() => {
+    const words = topic.split(' ');
+    if (words.length <= 10) {
+      return topic;
+    }
+    return words.slice(0, 10).join(' ') + '...';
+  }, [topic]);
+
   return (
     <div className="theatre-page" style={scaleStyle}>
       {/* Desktop Back Button */}
@@ -212,7 +221,7 @@ export function TheatrePage() {
       )}
 
       <div className="theatre-header">
-        <p className="scenario-text">"{topic}"</p>
+        <p className="scenario-text" title={topic}>"{truncatedTopic}"</p>
         
         <div className={`start-controls ${conversationStarted ? "hidden" : ""}`}>
           <div className="status-line">
