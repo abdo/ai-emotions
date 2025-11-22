@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
+import { BREAKPOINTS } from '../constants/breakpoints';
 
 /**
- * Hook to apply dynamic scaling for large screens (>1600px).
+ * Hook to apply dynamic scaling for large screens (>BREAKPOINTS.DESKTOP_LARGE).
  * It calculates a scale transform to maintain layout proportions.
  * 
- * @param baseWidth The base width to scale from (default: 1600px)
+ * @param baseWidth The base width to scale from (default: BREAKPOINTS.DESKTOP_LARGE)
  * @returns A style object to apply to the container
  */
-export function useDynamicScale(baseWidth: number = 1600) {
+export function useDynamicScale(baseWidth: number = BREAKPOINTS.DESKTOP_LARGE) {
   const [scaleStyle, setScaleStyle] = useState<React.CSSProperties>({});
 
   useEffect(() => {

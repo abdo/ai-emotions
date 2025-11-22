@@ -9,8 +9,6 @@
   background: #0a0a0a;
   color: #e0e0e0;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
 }
 
 .back-arrow-btn {
@@ -140,6 +138,26 @@
 
 .status-line {
   margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.start-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: opacity 0s, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+  max-height: 200px; /* Enough to fit button and text */
+  opacity: 1;
+  overflow: hidden;
+}
+
+.start-controls.hidden {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
 }
 
 .status {
@@ -176,7 +194,7 @@
 
 .play-story-btn {
   display: block;
-  margin: 0 auto 1rem;
+  margin: 0 auto;
   padding: 1.2rem 3rem;
   font-size: 1.15rem;
   font-weight: 600;
@@ -199,11 +217,6 @@
 
 .play-story-btn:active {
   transform: translateY(0);
-}
-
-.play-story-btn.hidden {
-  visibility: hidden;
-  pointer-events: none;
 }
 
 /* Mobile Drawer */
@@ -363,34 +376,109 @@
 /* Dialogue Display */
 
 
+/* Mobile Top Actions */
+.mobile-top-actions {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  z-index: 100;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none; /* Let clicks pass through empty space */
+}
+
+.mobile-top-actions .icon-btn {
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.mobile-top-actions .right-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Mobile Bottom Controls */
+.mobile-bottom-controls {
+  display: none;
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  gap: 1.5rem;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 2rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-bottom-controls .control-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.mobile-bottom-controls .control-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mobile-bottom-controls .main-control {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.mobile-bottom-controls .main-control svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
 /* Responsive */
-@media (max-width: 768px) {
-  .mobile-drawer {
-    display: block;
+@media (max-width: 1024px) { /* TABLET breakpoint */
+  .desktop-only {
+    display: none !important;
   }
 
-  .side-actions {
-    display: none;
+  .mobile-top-actions {
+    display: flex;
   }
 
-  .back-arrow-btn {
-    display: none;
+  .mobile-bottom-controls {
+    display: flex;
   }
 
   .theatre-header {
-    margin-top: 5rem;
+    margin-top: 4rem;
+    margin-bottom: 0;
   }
 
   .theatre-page {
-    padding: 1.5rem;
-  }
-
-  .scenario-text {
-    font-size: 1.1rem;
-  }
-
-  .dialogue-display {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 }
 

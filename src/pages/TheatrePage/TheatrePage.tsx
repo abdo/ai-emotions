@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import ChromaGrid from "../../components/ChromaGrid/ChromaGrid";
+import ChromaGallery from "../../components/ChromaGallery/ChromaGallery";
 import { VolumeControl } from "../../components/VolumeControl/VolumeControl";
 import { DownloadIcon } from "../../ui/icons/DownloadIcon";
 import { ReplayIcon } from "../../ui/icons/ReplayIcon";
@@ -10,6 +11,7 @@ import { ScrollTextIcon } from "../../ui/icons/ScrollTextIcon";
 import { useShow } from "../../hooks/useShow";
 import { useAudioPlayback } from "../../hooks/useAudioPlayback";
 import { useDynamicScale } from "../../hooks/useDynamicScale";
+import { BREAKPOINTS } from "../../constants/breakpoints";
 import "./TheatrePage.css";
 
 // Loading messages - defined outside component to avoid recreation
@@ -51,9 +53,18 @@ export function TheatrePage() {
   const [conversationStarted, setConversationStarted] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < BREAKPOINTS.TABLET);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < BREAKPOINTS.TABLET);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Dynamic scaling for large screens
-  const scaleStyle = useDynamicScale(1600);
+  const scaleStyle = useDynamicScale(BREAKPOINTS.DESKTOP_LARGE);
 
   // Redirect to home if no topic provided, fetch story once on mount
   useEffect(() => {
@@ -158,17 +169,36 @@ export function TheatrePage() {
 
   return (
     <div className="theatre-page" style={scaleStyle}>
+      {/* Desktop Back Button */}
       <button
-        className="back-arrow-btn"
+        className="back-arrow-btn desktop-only"
         onClick={handleBack}
         aria-label="Go back"
       >
         ← Back
       </button>
 
+      {/* Mobile Top Actions (Back, Audio, Script) */}
+      <div className="mobile-top-actions">
+        <button className="icon-btn" onClick={handleBack} aria-label="Back">
+          ←
+        </button>
+        <div className="right-actions">
+          <button className="icon-btn" onClick={downloadConversation} aria-label="Download Audio">
+            <DownloadIcon />
+          </button>
+          <button className="icon-btn" onClick={downloadScript} aria-label="Download Script">
+            <ScrollTextIcon />
+          </button>
+        </div>
+      </div>
+
       {conversationStarted && (
         <>
-          <VolumeControl volume={volume} onVolumeChange={handleVolumeChange} />
+          {/* Volume Control - Desktop Only */}
+          {!isMobileView && (
+            <VolumeControl volume={volume} onVolumeChange={handleVolumeChange} />
+          )}
 
           <div className="theatre-lights">
             <div className="light1">
@@ -183,120 +213,91 @@ export function TheatrePage() {
 
       <div className="theatre-header">
         <p className="scenario-text">"{topic}"</p>
-        <div className="status-line">
-          {isLoading && <span className="status">{LOADING_MESSAGES[loadingMessageIndex]}</span>}
-          {!isLoading && (
-            <span className="status-ready">Ready to play</span>
+        
+        <div className={`start-controls ${conversationStarted ? "hidden" : ""}`}>
+          <div className="status-line">
+            {isLoading && <span className="status">{LOADING_MESSAGES[loadingMessageIndex]}</span>}
+            {!isLoading && (
+              <span className="status-ready">Ready to play</span>
+            )}
+          </div>
+
+          {allVoicesReady && gridItems.length > 0 && (
+            <button
+              className="play-story-btn"
+              onClick={startConversation}
+            >
+              ▶ Start the show
+            </button>
           )}
         </div>
+
         {error && <p className="error-text">{error}</p>}
       </div>
 
       {allVoicesReady && gridItems.length > 0 && (
         <>
-          <button
-            className={`play-story-btn ${conversationStarted ? "hidden" : ""}`}
-            onClick={startConversation}
-          >
-            ▶ Start the show
-          </button>
-
-          {conversationStarted && (
-            <>
-              {/* Mobile drawer */}
-              <div className="mobile-drawer">
-                <button
-                  className="drawer-toggle"
-                  onClick={() => {
-                    const drawer = document.querySelector(".drawer-content");
-                    drawer?.classList.toggle("open");
-                  }}
-                >
-                  ☰ Actions
-                </button>
-                <div className="drawer-content">
-                  <button className="drawer-action-btn" onClick={handleBack}>
-                    ← Back
-                  </button>
-                  <button
-                    className="drawer-action-btn drawer-icon-btn"
-                    onClick={togglePause}
-                  >
-                    {hasEnded || isPaused ? (
-                      <>
-                        <PlayIcon /> {hasEnded ? "Play Again" : "Resume"}
-                      </>
-                    ) : (
-                      <>
-                        <PauseIcon /> Pause
-                      </>
-                    )}
-                  </button>
-                  <button
-                    className="drawer-action-btn drawer-icon-btn"
-                    onClick={replayConversation}
-                  >
-                    <ReplayIcon /> Replay
-                  </button>
-                  <button
-                    className="drawer-action-btn drawer-icon-btn"
-                    onClick={downloadConversation}
-                  >
-                    <DownloadIcon /> Audio
-                  </button>
-                  <button
-                    className="drawer-action-btn drawer-icon-btn"
-                    onClick={downloadScript}
-                  >
-                    <ScrollTextIcon /> Script
-                  </button>
-                </div>
-              </div>
-
-              {/* Desktop side buttons */}
-              <div className="side-actions">
-                <button
-                  className="side-action-btn pause-side-btn"
-                  onClick={togglePause}
-                  title={
-                    hasEnded ? "Play Again" : isPaused ? "Resume" : "Pause"
-                  }
-                >
-                  {hasEnded || isPaused ? <PlayIcon /> : <PauseIcon />}
-                </button>
-                <button
-                  className="side-action-btn replay-side-btn"
-                  onClick={replayConversation}
-                  title="Replay"
-                >
-                  <ReplayIcon />
-                </button>
-                <button
-                  className="side-action-btn download-side-btn"
-                  onClick={downloadConversation}
-                  title="Download Audio"
-                >
-                  <DownloadIcon />
-                </button>
-                <button
-                  className="side-action-btn download-script-btn"
-                  onClick={downloadScript}
-                  title="Download Script"
-                >
-                  <ScrollTextIcon />
-                </button>
-              </div>
-            </>
+          {/* Mobile Bottom Controls (Play/Pause, Replay) */}
+          {conversationStarted && isMobileView && (
+            <div className="mobile-bottom-controls">
+              <button className="control-btn main-control" onClick={togglePause}>
+                {hasEnded || isPaused ? <PlayIcon /> : <PauseIcon />}
+              </button>
+              <button className="control-btn" onClick={replayConversation}>
+                <ReplayIcon />
+              </button>
+            </div>
           )}
 
+          {/* Desktop Side Actions */}
+          <div className="side-actions desktop-only">
+            <button
+              className="side-action-btn pause-side-btn"
+              onClick={togglePause}
+              title={
+                hasEnded ? "Play Again" : isPaused ? "Resume" : "Pause"
+              }
+            >
+              {hasEnded || isPaused ? <PlayIcon /> : <PauseIcon />}
+            </button>
+            <button
+              className="side-action-btn replay-side-btn"
+              onClick={replayConversation}
+              title="Replay"
+            >
+              <ReplayIcon />
+            </button>
+            <button
+              className="side-action-btn download-side-btn"
+              onClick={downloadConversation}
+              title="Download Audio"
+            >
+              <DownloadIcon />
+            </button>
+            <button
+              className="side-action-btn download-script-btn"
+              onClick={downloadScript}
+              title="Download Script"
+            >
+              <ScrollTextIcon />
+            </button>
+          </div>
+
           <div className="grid-wrapper">
-            <ChromaGrid
-              items={gridItems}
-              radius={340}
-              columns={Math.min(5, gridItems.length)}
-              rows={Math.ceil(gridItems.length / 5)}
-              selectedPersonaId={speakingCharacterId}
-            />
+            {isMobileView ? (
+              <ChromaGallery
+                items={gridItems}
+                speakingCharacterId={speakingCharacterId}
+              />
+            ) : (
+              <ChromaGrid
+                items={gridItems}
+                radius={340}
+                columns={Math.min(5, gridItems.length)}
+                rows={Math.ceil(gridItems.length / 5)}
+                selectedPersonaId={speakingCharacterId}
+              />
+            )}
           </div>
         </>
       )}

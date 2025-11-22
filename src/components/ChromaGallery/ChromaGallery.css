@@ -1,0 +1,85 @@
+.chroma-gallery {
+  position: relative;
+  width: 100%;
+  height: 450px; /* Reduced height */
+  perspective: 1000px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top */
+  margin-top: 0; /* Removed margin */
+}
+
+.chroma-gallery-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top */
+}
+
+.chroma-gallery-card {
+  position: absolute;
+  width: 245px;
+  height: auto;
+  background: var(--card-gradient);
+  border-radius: 20px;
+  border: 1px solid #333;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1); /* Smooth ease-out */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  
+  /* Top alignment */
+  left: 50%;
+  top: 2rem; /* Fixed top offset */
+  transform-origin: center center;
+}
+
+.chroma-gallery-card.active {
+  border-color: var(--card-border);
+  box-shadow: 0 0 40px var(--card-border), 0 20px 50px rgba(0,0,0,0.6);
+  z-index: 100;
+}
+
+.chroma-gallery-card .chroma-img-wrapper {
+  flex: 1;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.chroma-gallery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  aspect-ratio: 3/4; /* Enforce aspect ratio for consistency */
+}
+
+.chroma-gallery-card .chroma-info {
+  padding: 1rem;
+  color: #fff;
+}
+
+.chroma-gallery-card .name {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.chroma-gallery-card .role {
+  color: #aaa;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.chroma-gallery-card .handle {
+  color: #666;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 0.25rem;
+}
