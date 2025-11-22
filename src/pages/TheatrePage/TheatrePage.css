@@ -121,8 +121,7 @@
 
 .theatre-header {
   max-width: 1000px;
-  margin: 0 auto;
-  margin-top: 4rem;
+  margin: 4rem auto 1rem;
   text-align: center;
   position: relative;
   z-index: 1;

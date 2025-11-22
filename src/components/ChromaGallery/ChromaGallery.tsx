@@ -26,7 +26,7 @@ export const ChromaGallery: React.FC<ChromaGalleryProps> = ({
   speakingCharacterId,
   onCardClick
 }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => Math.floor(items.length / 2));
 
   // Sync active index with speaking character
   useEffect(() => {
