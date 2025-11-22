@@ -11,12 +11,12 @@ import { setGlobalOptions } from "firebase-functions";
 import { onRequest } from "firebase-functions/https";
 import { ShowController } from "./controllers/showController";
 import cors from "cors";
+import { allowedOrigins } from "./allowedOrigins";
 
 setGlobalOptions({ maxInstances: 10 });
 
-// Configure CORS to allow specific origins
 const corsHandler = cors({
-  origin: ["http://localhost:5173", "https://ai-show.com"],
+  origin: allowedOrigins,
   credentials: true,
 });
 

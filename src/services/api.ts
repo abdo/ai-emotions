@@ -1,6 +1,7 @@
 import axios from "axios";
+import apiUrl from "./apiUrl";
 
-const API_URL = "https://getshow-ejinsneowq-uc.a.run.app";
+const API_URL = apiUrl;
 
 export interface ShowRequest {
   userInput: string;

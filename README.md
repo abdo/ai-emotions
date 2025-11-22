@@ -49,17 +49,28 @@ OPENAI_TTS_API_KEY=sk-proj-... # Required
 
 ### Run Locally
 
+**Option 1: Single Command (Recommended)**
 ```bash
-# Terminal 1: Start frontend
 npm run dev
+```
+This runs both frontend and backend concurrently in one terminal.
 
-# Terminal 2: Start backend emulator
-cd backend/functions
-npm run serve
+**Option 2: Separate Terminals**
+```bash
+# Terminal 1: Frontend
+npm run dev:frontend
+
+# Terminal 2: Backend
+npm run dev:backend
 ```
 
 Frontend: `http://localhost:5173`  
 Backend: `http://localhost:5000`
+
+> [!TIP]
+> **Quick Environment Check**: Before starting, verify these files have the correct dev URLs:
+> - Frontend: `src/services/apiUrl.ts` → Should point to `http://localhost:5000/ai-show-afb45/us-central1/getShow`
+> - Backend: `backend/functions/src/allowedOrigins.ts` → Should include `http://localhost:5173`
 
 ## 📁 Project Structure
 
