@@ -10,6 +10,16 @@ import { useShow } from "../../hooks/useShow";
 import { useAudioPlayback } from "../../hooks/useAudioPlayback";
 import "./TheatrePage.css";
 
+// Loading messages - defined outside component to avoid recreation
+const LOADING_MESSAGES = [
+  "Creating the scene",
+  "Casting actors...",
+  "Setting up the lighting...",
+  "Adjusting camera angles...",
+  "Doing rehearsals...",
+  "Applying makeup...",
+];
+
 export function TheatrePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,7 +33,6 @@ export function TheatrePage() {
   const { story, audioMap: backendAudioMap, fetchShow, error } = useShow();
 
   const {
-    audioMap,
     loadAudioMap,
     playAllDialogue,
     stopAudio,
@@ -38,7 +47,8 @@ export function TheatrePage() {
   } = useAudioPlayback();
 
   const [conversationStarted, setConversationStarted] = useState(false);
-  const [loadingStage, setLoadingStage] = useState<'idle' | 'preparing' | 'calling' | 'ready'>('idle');
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Redirect to home if no topic provided, fetch story once on mount
   useEffect(() => {
@@ -48,15 +58,16 @@ export function TheatrePage() {
     }
     unlockAudio();
     
-    setLoadingStage('preparing');
+    setIsLoading(true);
+    setLoadingMessageIndex(0);
     fetchShow(topic, userName, mode as 'conversation' | 'story');
     
-    // Fake transition to "Calling actors..." after 1.5s
-    const timer = setTimeout(() => {
-      setLoadingStage((prev) => prev === 'preparing' ? 'calling' : prev);
+    // Cycle through loading messages every second
+    const messageInterval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
     }, 1500);
 
-    return () => clearTimeout(timer);
+    return () => clearInterval(messageInterval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, userName, navigate]);
 
@@ -71,7 +82,7 @@ export function TheatrePage() {
   useEffect(() => {
     if (story && backendAudioMap) {
       loadAudioMap(backendAudioMap, story.dialogue);
-      setLoadingStage('ready');
+      setIsLoading(false);
     }
   }, [story, backendAudioMap, loadAudioMap]);
 
@@ -108,8 +119,8 @@ export function TheatrePage() {
   };
 
   const allVoicesReady = useMemo(() => {
-    return loadingStage === 'ready';
-  }, [loadingStage]);
+    return !isLoading && story !== null;
+  }, [isLoading, story]);
 
   // Get the character currently speaking
   const speakingCharacterId = useMemo(() => {
@@ -147,9 +158,8 @@ export function TheatrePage() {
       <div className="theatre-header">
         <p className="scenario-text">"{topic}"</p>
         <div className="status-line">
-          {loadingStage === 'preparing' && <span className="status">Preparing the scene...</span>}
-          {loadingStage === 'calling' && <span className="status">Calling actors...</span>}
-          {loadingStage === 'ready' && (
+          {isLoading && <span className="status">{LOADING_MESSAGES[loadingMessageIndex]}</span>}
+          {!isLoading && (
             <span className="status-ready">Ready to play</span>
           )}
         </div>

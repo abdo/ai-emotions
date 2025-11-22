@@ -136,7 +136,7 @@ export function LandingPage() {
           </div>
 
           <div className="examples-section">
-            <p className="examples-label">or explore:</p>
+            <p className="examples-label">or try:</p>
             <div className="examples-grid">
               {examplePrompts.map((prompt, index) => (
                 <button
