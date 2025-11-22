@@ -479,6 +479,12 @@
   .theatre-page {
     padding: 1rem 0;
   }
+
+  .grid-wrapper {
+    height: 70vh;
+    display: flex;
+    align-items: center;
+  }
 }
 
 
