@@ -17,14 +17,36 @@ export const ScriptOverlay: React.FC<ScriptOverlayProps> = ({
   scenario,
   scriptLines
 }) => {
+  // Handle Escape key to close overlay
+  React.useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (isOpen && e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="script-overlay" onClick={onClose}>
+    <div 
+      className="script-overlay" 
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="script-title"
+    >
       <div className="script-overlay-content" onClick={(e) => e.stopPropagation()}>
         <div className="script-overlay-header">
+          <h2 id="script-title" className="sr-only">Script</h2>
           <span />
-          <button className="close-overlay-btn" onClick={onClose}>
+          <button 
+            className="close-overlay-btn" 
+            onClick={onClose}
+            aria-label="Close script overlay"
+          >
             ×
           </button>
         </div>

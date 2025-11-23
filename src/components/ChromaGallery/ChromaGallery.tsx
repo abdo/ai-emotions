@@ -116,6 +116,16 @@ export const ChromaGallery: React.FC<ChromaGalleryProps> = ({
                 '--card-gradient': item.gradient,
               } as React.CSSProperties}
               onClick={() => handleCardClick(index, item)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(index, item);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select character ${item.title}`}
+              aria-pressed={isActive}
             >
               <div className="chroma-img-wrapper">
                 <img src={item.image} alt={item.title} loading="lazy" />

@@ -16,9 +16,11 @@ export function VolumeControl({ volume, onVolumeChange }: VolumeControlProps) {
           max="100"
           value={volume}
           onChange={(e) => onVolumeChange(Number(e.target.value))}
+          aria-label="Volume control"
         />
         <svg
           className="volume-icon"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           version="1.1"
           xmlnsXlink="http://www.w3.org/1999/xlink"

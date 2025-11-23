@@ -17,6 +17,7 @@ export function ModeSwitch({ isConversationMode, onToggle }: ModeSwitchProps) {
             id="mode-toggle"
             checked={!isConversationMode}
             onChange={(e) => onToggle(!e.target.checked)}
+            aria-label={isConversationMode ? "Switch to Story mode" : "Switch to Conversation mode"}
           />
           <div className="cookie">
             <span className="cookie-part-1" />

@@ -137,6 +137,15 @@ export const ChromaGrid = ({
             onMouseMove={handleCardMove}
             onMouseEnter={() => onCardEnter?.(c, i)}
             onClick={() => handleCardClick(c.url)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleCardClick(c.url);
+              }
+            }}
+            role={c.url ? "link" : "article"}
+            tabIndex={0}
+            aria-label={`${c.title}, ${c.subtitle}`}
             style={
               {
                 "--card-border": c.borderColor || "transparent",
