@@ -2,6 +2,8 @@
 
 AI Show transforms your stories into theatrical performances through AI-generated characters with unique personalities and realistic voices.
 
+![AI Show Banner](/public/og-image.png)
+
 ## ✨ Features
 
 - **Two Modes**: Story Mode (dramatic re-enactment) or Conversation Mode (dynamic discussion)

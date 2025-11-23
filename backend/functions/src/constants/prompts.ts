@@ -12,51 +12,51 @@ import { availableRoles, roleDescriptions } from "./theatreCharacters";
  */
 export const conversationScenarios = [
   "Everyone initially agrees, but one person who had an extreme personal experience challenges the consensus and forces others to reconsider.",
-  
+
   "The conversation starts with curiosity and people building on each other's ideas, discovering perspectives they hadn't considered before.",
-  
+
   "The situation reminds one character of something from their past, and as they share their story, others become curious and the conversation shifts to explore that parallel experience.",
-  
+
   "What seems like a simple topic reveals deep personal stakes when someone shares why this matters to them on a profound level.",
-  
+
   "One person plays devil's advocate so convincingly that they start questioning their own position, creating doubt in others.",
-  
+
   "A quiet observer suddenly speaks up with information or a perspective that completely shifts the conversation's direction.",
-  
+
   "Through discussing the friend's situation, the group accidentally discovers an unexpected solution or approach no one had considered.",
-  
+
   "Someone's seemingly innocent question exposes a contradiction that nobody noticed, unraveling the conversation.",
-  
+
   "As the discussion deepens, participants realize they're actually talking about something much bigger than the original topic.",
-  
+
   "One person's vulnerability opens the door for others to drop their defenses, turning debate into raw honesty.",
-  
+
   "The conversation takes a lighthearted turn when someone finds humor in the situation, helping everyone see it from a fresh angle.",
-  
+
   "One character's personal story is so compelling that it completely shifts everyone's perspective on the friend's situation.",
-  
+
   "Someone introduces new information midway through that forces everyone to reconsider their positions.",
-  
+
   "The group realizes they're all making different assumptions about the same situation, leading to productive chaos.",
-  
+
   "An uncomfortable truth gets voiced that everyone was thinking but nobody wanted to say, breaking the tension.",
-  
+
   "The discussion oscillates between intellectual analysis and emotional reactions, never fully settling on one mode.",
-  
+
   "People start connecting dots between seemingly unrelated things, leading to surprising insights and 'aha' moments.",
-  
+
   "Two characters who initially disagreed find unexpected common ground, while another character raises new concerns no one thought of.",
-  
+
   "Multiple people speak from personal experience, finding unexpected parallels that create empathy and understanding.",
-  
+
   "The conversation becomes playful and creative as people imagine different what-if scenarios together.",
-  
+
   "Someone offers surprisingly practical advice based on their own experience, shifting the conversation from abstract to actionable.",
-  
+
   "A character's unexpected emotional reaction to the situation reveals something about themselves, making others see them differently.",
-  
+
   "The group discovers they each have a piece of the puzzle, and by combining their perspectives, they see the full picture.",
-  
+
   "One person's optimism clashes with another's realism, while a third finds a way to bridge both viewpoints in a surprising way.",
 ];
 
@@ -138,7 +138,7 @@ const SHARED_INSTRUCTIONS = `**BE CREATIVE:**
 Don't fall into predictable patterns. Surprise with unexpected turns, unique character dynamics, and fresh perspectives. Avoid one-dimensional conversations where everyone just states opinions. Make it cinematic and memorable.
 
 **YOUR MISSION:**
-Craft a conversation of 14-18 exchanges that feels like the most memorable scene from an award-winning film. This should be the kind of dialogue people quote, discuss, and remember.
+Craft a conversation of 16-20 exchanges that feels like the most memorable scene from an award-winning film. This should be the kind of dialogue people quote, discuss, and remember.
 
 **CHARACTER DEPTH:**
 Create characters with:
@@ -151,10 +151,10 @@ Create characters with:
 **IMPORTANT: STANDARDIZED ROLES**
 Each character MUST have a "role" field that uses ONE of these exact values (this affects their voice characteristics):
 ${availableRoles
-  .map((role) => `- "${role}" - ${roleDescriptions[role]}`)
-  .join("\n")}
+    .map((role) => `- "${role}" - ${roleDescriptions[role]}`)
+    .join("\n")}
 
-Choose roles that create interesting dynamics and contrast. Each character should embody their role in speech patterns and perspective.
+Choose roles that create interesting dynamics and contrast. Each character should embody their role in speech patterns and perspective, but there can be a character arc or development in the story if needed, roll the dice on that.
 
 **DIALOGUE CRAFT:**
 
@@ -286,7 +286,7 @@ const STORY_STRUCTURE = `**STRUCTURAL REQUIREMENTS (CINEMATIC SCENE):**
 export function storyGenerationPrompt(mode: 'conversation' | 'story' = 'conversation'): string {
   const modeFraming = mode === 'conversation' ? getConversationModeFraming() : STORY_MODE_FRAMING;
   const structure = mode === 'conversation' ? CONVERSATION_STRUCTURE : STORY_STRUCTURE;
-  
+
   // Only include conversation pattern for conversation mode
   let patternSection = "";
   if (mode === 'conversation') {
@@ -297,7 +297,7 @@ ${getRandomScenario()}
 Use this as a loose guide for the conversation's dynamic. Adapt it naturally to fit the user's situation - don't force it.
 `;
   }
-  
+
   return `You are a master screenwriter creating a gripping, emotionally charged conversation between 3-5 distinct characters.
 
 **USER'S SITUATION:** [will be inserted]

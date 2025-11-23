@@ -28,6 +28,7 @@ export const roleDescriptions = {
   curious: "inquisitive, exploring, engaged",
   compassionate: "deeply caring, warm, gentle",
   humorous: "witty, light, playful timing",
+  sarcastic: "dry, cynical, quick wit",
   thoughtful: "reflective, considering, measured",
 } as const;
 

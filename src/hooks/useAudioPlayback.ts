@@ -37,7 +37,7 @@ export function useAudioPlayback() {
 
   const loadAudioMap = useCallback((backendAudioMap: Record<number, string>, dialogue: any[]) => {
     const newAudioMap: AudioMap = {};
-    
+
     dialogue.forEach((line, index) => {
       const base64Audio = backendAudioMap[index];
       if (base64Audio) {
