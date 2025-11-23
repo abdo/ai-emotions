@@ -70,8 +70,7 @@ export function LandingPage() {
           </h1>
           <p className="hero-description">
             Turn any situation into a cinematic conversation. Watch as AI
-            characters debate, connect, and challenge each other with distinct
-            voices and personalities.
+            characters debate, connect, and challenge each other with distinct personalities.
           </p>
           <button
             className="hero-cta"

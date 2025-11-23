@@ -124,12 +124,121 @@ You are creating a dramatic re-enactment inspired by what [USER_NAME] described.
 - Let the scene breathe - moments of silence, hesitation, realization.
 - Create atmosphere through how characters speak and react.
 - Make the most emotionally powerful choice - surprise us with your creativity.
+- Allow for stillness and reflection, not just constant talking
 
 **CHARACTER GUIDELINES:**
 - When [USER_NAME] is in the scene: use their name when others address them, first-person when they speak.
 - Based on the name, infer [USER_NAME]'s likely gender for consistency.
 - Focus on authentic reactions and emotions in the heat of the moment.
-- Create characters naturally based on who belongs in THIS specific scene.`;
+- Create characters naturally based on who belongs in THIS specific scene.
+- Let characters be complex - capable of both hurting and healing, defending and opening up`;
+
+/**
+ * 20 Distinct SERIOUS Tone Directives for Story Mode
+ * Focused on conflict, drama, intensity, and heavy emotions.
+ */
+export const seriousStoryToneDirectives = [
+  "**TONE: THE VICIOUS SPIRAL.** One character is hyperventilating, catastrophizing the situation until they are physically shaking with anxiety. They are dragging everyone down into a pit of worst-case scenarios. Meanwhile, another character is getting visibly agitated, their patience snapping because they can't handle the first person's panic. The air is thick with the feeling of losing control.",
+
+  "**TONE: BLIND, TOXIC LOYALTY.** One character adopts an aggressive 'ride or die' stance, validating even the worst impulses of the situation with scary intensity. They are shouting down anyone who tries to be reasonable. Another character is swept up in this mob mentality, feeling the adrenaline of the fight. It feels like a war room where logic has been banned in favor of pure, unadulterated anger on the user's behalf.",
+
+  "**TONE: SURGICAL DETACHMENT.** One character acts as a cold, clinical observer, dissecting the situation with zero empathy, stating uncomfortable facts that hurt to hear. They treat the people involved like data points. Another character is visibly recoiling from this coldness, looking at them with a mix of horror and disbelief, creating a sharp emotional friction between heart and brain.",
+
+  "**TONE: THE DEFENSE MECHANISM (HUMOR).** One character refuses to let the moment be serious, cracking inappropriate, dark jokes to keep the pain at arm's length. They are laughing because if they stop, they might scream. Another character tries to stay serious but gets pulled into the absurdity, leading to a confusing mix of grief and hysterical laughter that feels slightly unhinged.",
+
+  "**TONE: PROJECTED TRAUMA.** The current situation acts as a trigger. One character stops listening to the actual details and starts projecting their own past unhealed wounds onto the story. They are speaking to the user, but they are really screaming at a ghost from their own past. A different character notices this projection and tries to gently—or roughly—snap them back to reality.",
+
+  "**TONE: PARANOID DECONSTRUCTION.** One character is convinced there is a lie or a conspiracy hidden here. They are squinting, pacing, and picking apart every word, looking for the trap. They make everyone else nervous. Another character starts to doubt their own memory or perception under this interrogation, creating an atmosphere of gaslighting and psychological unease.",
+
+  "**TONE: THE HUSHED CONFESSIONAL.** The energy drops to a whisper. One character finally admits a secret shame they’ve been carrying for years, sparked by this situation. It is a moment of extreme vulnerability where their voice cracks and they can barely make eye contact. The others are stunned into silence, the weight of the confession sucking the air out of the room.",
+
+  "**TONE: NARCISSISTIC HIJACKING.** One character manages to make this entire situation about themselves—how *they* would handle it, how *they* are affected, how smart *they* are. They are technically 'helping,' but it feels performative and ego-driven. Another character rolls their eyes, vibrating with the effort to not scream at the narcissist, creating a layer of simmering resentment beneath the dialogue.",
+
+  "**TONE: THE COMEDY OF MISUNDERSTANDINGS.** One character is completely missing the point, focusing on a trivial detail with baffled intensity. Another character is trying to explain the gravity of the situation but is failing miserably. It’s a frustating, chaotic loop where they are talking past each other, and the tragedy of the situation is buried under the sheer incompetence of their communication.",
+
+  "**TONE: AGGRESSIVE APATHY.** One character is visibly checked out, scrolling on their phone or looking out the window, offering generic 'that sucks' platitudes that feel insulting. This indifference enrages another character, who cares *too* much and tries to force a reaction out of the apathetic one. The conflict isn't about the situation anymore; it's about the lack of feeling.",
+
+  "**TONE: EERIE CALM IN THE STORM.** While the situation demands panic, one character is unnervingly zen, processing the disaster with a smile that doesn't quite reach their eyes. It’s a dissociation response. Another character is freaked out by this lack of reaction, trying to shake them into acknowledging the danger. The vibe is psychological horror masked as composure.",
+
+  "**TONE: PASSIVE-AGGRESSIVE WARFARE.** No one raises their voice, but every sentence is a knife. One character offers 'advice' that is actually a veiled insult about the user's life choices. Another character responds with saccharine sweetness that drips with venom. The subtext is screaming hate, but the surface is polite enough for a tea party.",
+
+  "**TONE: THE MORAL HIGH HORSE.** One character treats this situation as a lecture, standing on a soapbox to preach about society, ethics, or 'kids these days.' They are insufferable and detached from the human pain. Another character, who is actually hurting, feels minimized and judged by this sermon, shrinking into themselves or bubbling with silent rage.",
+
+  "**TONE: THE CONSPIRATORIAL HUDDLE.** The characters feel like they are getting away with something. One character leans in close, whispering plans of revenge or manipulation with a gleeful, illicit excitement. Another character is hesitant but gets seduced by the thrill of the scheme. It feels like a scene in a heist movie right before everything goes wrong.",
+
+  "**TONE: THE GENERATIONAL CHASM.** One character speaks from a place of 'old school' grit, dismissing emotions as weakness. Another character speaks the language of modern therapy and validation. They literally cannot understand each other. The frustration is palpable as one character feels disrespected and the other feels unsafe.",
+
+  "**TONE: THE GUILT TRIP.** One character dissolves into self-pity, wailing about how they failed the user or how they are a bad friend, forcing everyone else to comfort *them* instead of focusing on the problem. Another character watches this performance with cold cynicism, refusing to participate in the emotional blackmail.",
+
+  "**TONE: MANIC POSITIVITY.** One character refuses to acknowledge reality. They are aggressively cheerful, plastering 'good vibes only' over a gaping wound. It feels delusional and manic. Another character tries to express genuine sadness but is immediately shut down by the toxic positivity, leaving them feeling isolated and gaslit.",
+
+  "**TONE: THE VOYEURISTIC JUDGE.** One character treats the situation like tea/gossip. They are leaning forward, eyes wide, asking for salacious details not because they care, but because they are entertained. It feels predatory. Another character recognizes this and becomes guarded, feeding them crumbs of information while trying to protect the user's dignity.",
+
+  "**TONE: HEAVY, SUFFOCATING GRIEF.** There is no yelling, only the weight of loss. One character can barely get words out, choked up by a realization that something is broken forever. Another character tries to speak but finds there are no words that fit. The silence between the lines is loud, heavy, and filled with the ache of resignation.",
+
+  "**TONE: THE SUDDEN BETRAYAL.** The conversation starts supportive, but then one character suddenly flips the script, revealing they actually agree with the 'enemy' or the opposing side. The shock in the room is instant. Another character stammers, trying to process this unexpected knife in the back, shifting the dynamic from support to defense."
+];
+
+/**
+ * 20 Distinct LIGHT/POSITIVE Tone Directives for Story Mode
+ * Focused on relief, joy, calm, connection, and lighter human experiences.
+ */
+export const lightStoryToneDirectives = [
+  "**TONE: THE EXHALE OF RELIEF.** The situation turns out to be much better than expected. Characters are physically slumping with relief, laughing breathlessly. The tension melts away, replaced by a warm, fuzzy feeling of safety. It's that moment after a scare when you realize everything is actually going to be okay.",
+
+  "**TONE: AGGRESSIVE WHOLESOMENESS.** One character is determined to shower the user with love and support, almost to a comical degree. They are hyping the user up like a boxing coach. Another character joins in, creating a feedback loop of positivity that is so intense it becomes funny, but genuinely heartwarming.",
+
+  "**TONE: THE PETTY OLYMPICS.** The situation is trivial, and the characters know it, but they are leaning into the pettiness for sport. They are roasting the 'antagonist' of the story with creative insults and low-stakes drama. It's fun, catty, and bonding—like friends trashing an ex over wine.",
+
+  "**TONE: QUIET CONTENTMENT.** A moment of stillness. The characters aren't doing much, just sitting with the situation and finding peace in it. They speak in soft, comfortable tones. It's about the beauty of a simple, undramatic moment shared between friends who don't need to fill the silence.",
+
+  "**TONE: THE SPARK OF INSPIRATION.** One character suddenly sees a massive opportunity in the situation. Their eyes light up, they start talking fast, pacing. The energy is electric and contagious. Another character catches the bug, and soon they are brainstorming wild, exciting possibilities.",
+
+  "**TONE: UNEXPECTED PRIDE.** A character notices something the user did—a small act of courage or kindness—and points it out with genuine admiration. The mood shifts from analyzing the problem to celebrating the person. It's a moment of being truly seen and appreciated.",
+
+  "**TONE: THE GENTLE REALITY CHECK.** No harsh truths here, just a soft, loving perspective shift. One character helps the user see that they are being too hard on themselves. It's like a warm hug in verbal form, dissolving guilt and replacing it with self-compassion.",
+
+  "**TONE: SHARED NOSTALGIA.** The situation reminds the characters of 'the good old days.' They start swapping stories, laughing about past mistakes or triumphs. The current problem fades into the background as the warmth of shared history takes over.",
+
+  "**TONE: THE ABSURDIST ESCAPE.** The situation is weird, so the characters decide to get weirder. They start making up elaborate, impossible scenarios or jokes. It's a flight of fancy where logic is abandoned for the sake of a good laugh and a mental break.",
+
+  "**TONE: ZEN ACCEPTANCE.** One character embodies total serenity, reacting to the chaos with a shrug and a smile. 'It is what it is.' Their chill vibe is infectious, helping the others lower their shoulders and stop fighting reality. A mood of peaceful surrender.",
+
+  "**TONE: THE CELEBRATION OF SMALL WINS.** The characters decide to ignore the big problem for a second and focus on one tiny thing that went right. They pop a metaphorical champagne bottle over something silly. It's about finding joy in the margins.",
+
+  "**TONE: PLAYFUL TEASING.** The characters are poking fun at the user or the situation, but it's clearly coming from a place of deep affection. It's the kind of roasting that makes you feel loved. Laughter is the primary language here.",
+
+  "**TONE: THE CURIOSITY TRIP.** Instead of judging, the characters become fascinated. 'Wait, that happened? That's amazing/weird!' They are asking questions, genuinely intrigued by the novelty of the situation. The vibe is one of exploration and wonder.",
+
+  "**TONE: MUTUAL ADMIRATION SOCIETY.** The characters spend the scene complimenting how the user handled things, or how they are handling it now. It's a pure ego-boost session, designed to build confidence and reinforce self-worth.",
+
+  "**TONE: THE COZY HUDDLE.** It feels like the characters are under a blanket fort. The world outside might be cold/scary, but in here, it's safe and warm. The dialogue is intimate, protective, and focused on comfort above all else.",
+
+  "**TONE: RIGHTEOUS VINDICATION.** The characters confirm that the user was 100% right. They are validating the user's feelings with enthusiastic agreement. 'I knew it! You called it!' It's the satisfaction of being proven right, shared with friends.",
+
+  "**TONE: THE SURPRISE TWIST (POSITIVE).** One character reveals a positive angle no one saw coming. 'But wait, doesn't this mean...?' The mood shifts from confusion to delighted realization. A problem is reframed as a blessing in disguise.",
+
+  "**TONE: HUMBLE GRATITUDE.** The characters realize how lucky they are, or how bad it *could* have been. The mood is grounded and thankful. It's a moment of perspective that makes the current issue feel manageable and small.",
+
+  "**TONE: THE CONFIDENCE BOOST.** One character gives a 'Braveheart' speech. They are rallying the troops, reminding the user of their strength. The energy builds from uncertainty to unshakeable determination.",
+
+  "**TONE: JUST VIBING.** Low stakes, low energy, high comfort. The characters are just hanging out in the situation, maybe eating snacks or staring at the ceiling. It's the comfort of presence without the pressure to 'fix' anything."
+];
+
+/**
+ * Randomly selects one SERIOUS story tone directive
+ */
+export function getRandomSeriousTone(): string {
+  return seriousStoryToneDirectives[Math.floor(Math.random() * seriousStoryToneDirectives.length)];
+}
+
+/**
+ * Randomly selects one LIGHT story tone directive
+ */
+export function getRandomLightTone(): string {
+  return lightStoryToneDirectives[Math.floor(Math.random() * lightStoryToneDirectives.length)];
+}
+
 
 /**
  * Shared instructions for both modes (Character depth, roles, dialogue craft, technical specs)
@@ -185,7 +294,6 @@ Examples:
 - "Whatever. Do what you want [dismissive, hurt]"
 
 Tone guidelines:
-- Be specific: not just "sad" but "heartbroken" or "disappointed"
 - Combine emotions when layered: [hopeful, nervous] or [angry, defensive]
 - Match the character's emotional arc through the conversation
 - Vary tones even for the same character - people's emotions shift!
@@ -198,16 +306,8 @@ Each line must:
 
 **ABSOLUTELY FORBIDDEN:**
 - Tidy resolutions where everyone learns and grows
-- All characters becoming best friends by the end
+- All characters becoming best friends by the end, things like "We are always here for you"
 - Safe, sanitized conflict
-
-**VOICE & TONE:**
-This should feel like:
-- Midnight conversations that keep you up thinking
-- Arguments that reveal uncomfortable truths
-- Moments of connection that surprise everyone
-- The scene in the movie where you lean forward
-- Real people struggling to communicate hard things
 
 **TECHNICAL SPECIFICATIONS:**
 
@@ -256,7 +356,16 @@ const CONVERSATION_STRUCTURE = `**STRUCTURAL REQUIREMENTS (DISCUSSION):**
 - Reach an emotional climax or breakthrough
 - Don't wrap everything up neatly - life is messy
 - End with transformation, lingering question, or paradigm shift
-- Leave the audience thinking`;
+- Leave the audience thinking
+
+**VOICE & TONE:**
+This should feel like:
+- Midnight conversations that keep you up thinking
+- Arguments that reveal uncomfortable truths
+- Moments of connection that surprise everyone
+- The scene in the movie where you lean forward
+- Real people struggling to communicate hard things
+`;
 
 /**
  * Structure for Story Mode (Cinematic Scene)
@@ -295,6 +404,27 @@ export function storyGenerationPrompt(mode: 'conversation' | 'story' = 'conversa
 ${getRandomScenario()}
 
 Use this as a loose guide for the conversation's dynamic. Adapt it naturally to fit the user's situation - don't force it.
+`;
+  } else {
+    // For story mode, include BOTH options and let AI choose
+    patternSection = `
+**NARRATIVE DIRECTIVE SELECTION (CRITICAL):**
+I have selected two potential "vibes" for this scene. You must choose the one that best fits the gravity of the user's situation.
+
+**OPTION A (SERIOUS/HEAVY):**
+${getRandomSeriousTone()}
+
+**OPTION B (LIGHT/POSITIVE):**
+${getRandomLightTone()}
+
+**INSTRUCTIONS:**
+1. Analyze the User's Situation.
+2. If the topic is heavy, traumatic, or deeply serious -> **USE OPTION A**.
+3. If the topic is light, trivial, funny, or heartwarming -> **USE OPTION B**.
+4. **ESCAPE HATCH:** If NEITHER option fits (e.g., Option A is too dark and Option B is too silly), you may ignore them and choose a completely different tone that matches the situation perfectly.
+
+**YOUR GOAL:**
+Commit fully to the chosen tone. If it's funny, make it genuinely funny. If it's dark, go deep. Do not mix them into a lukewarm middle ground.
 `;
   }
 
