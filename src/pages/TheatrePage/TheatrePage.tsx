@@ -230,13 +230,15 @@ export function TheatrePage() {
       </button>
 
       {/* Desktop New Scenario Button */}
-      <button
-        className="new-scenario-btn desktop-only"
-        onClick={handleNewScenario}
-        aria-label="Generate new scenario"
-      >
-        New Scenario ↻
-      </button>
+      {(isPaused || hasEnded) && (
+        <button
+          className="new-scenario-btn desktop-only"
+          onClick={handleNewScenario}
+          aria-label="Generate new scenario"
+        >
+          New Scenario ↻
+        </button>
+      )}
 
       {/* Mobile Top Actions (Back, Audio, Script) */}
       <nav className="mobile-top-actions" aria-label="Mobile navigation">
@@ -319,7 +321,7 @@ export function TheatrePage() {
           )}
 
           {/* Mobile New Scenario Button (Separate) */}
-          {conversationStarted && isMobileView && (
+          {conversationStarted && isMobileView && (isPaused || hasEnded) && (
             <button className="mobile-new-scenario-btn" onClick={handleNewScenario} aria-label="New Scenario">
               <span className="icon">↻</span>
               <span className="label">New Scenario</span>
