@@ -136,6 +136,15 @@ export function LandingPage() {
             >
               Start the Show <span aria-hidden="true">🎭</span>
             </button>
+
+            <button
+              className="submit-button talk-button"
+              onClick={() => navigate("/talk")}
+              aria-label="Talk with AI"
+              style={{ marginTop: '1rem', background: '#4ade80', color: '#000' }}
+            >
+              Talk with AI <span aria-hidden="true">🗣️</span>
+            </button>
             
             <ModeSwitch
               isConversationMode={isConversationMode}
