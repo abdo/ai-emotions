@@ -1,11 +1,11 @@
-// Slim server wrapper - delegates to talk and getShow
+// Slim server wrapper - delegates to talk and getShow handlers
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
-import { handleGetShow } from './getShow';
-import { setupWebSocket } from './talk';
+import { handleGetShow } from './handlers/getShow/getShow';
+import { setupWebSocket } from './handlers/talk/talk';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
