@@ -286,8 +286,8 @@
 
   .messages-list {
     padding: 1rem;
-    padding-top: 8rem;
-    min-height: 100vh;
+    margin-top: 8rem;
+    min-height: fill-available;
   }
 
   .message-bubble {
