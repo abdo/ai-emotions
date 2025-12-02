@@ -127,7 +127,7 @@ export function JobAutocomplete({ onSelect, placeholder = "e.g., Software Engine
           aria-label="Search for job role"
           aria-autocomplete="list"
           aria-controls="job-suggestions"
-          aria-expanded={showDropdown}
+          aria-expanded={!!showDropdown}
           autoComplete="off"
         />
         {isLoading && (
